@@ -1,0 +1,1 @@
+TransType=4&Reply=000&TransID=2&Date=21/12/2020 18:12:03&Order=6f601b4e-e627-4f6e-9a69-eb488a8a4499&Amount=55.30&Payments=1&Currency=1&ConfirmationNum=1234567&Comment=&ReplyDesc=SUCCESS&CCType=Visa&Descriptor=&RecurringSeries=&Last4=0000&ccStorageID=&Source=APPROVED&WalletID=&reference=5&signType=SHA256&signature=RmLxDqE3ZfaR86P%2ByHzlEn8tpK0eNloivdrEbdvLM8w%3D

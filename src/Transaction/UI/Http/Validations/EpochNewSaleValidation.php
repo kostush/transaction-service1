@@ -1,0 +1,81 @@
+<?php
+
+declare(strict_types=1);
+
+namespace ProBillerNG\Transaction\UI\Http\Validations;
+
+
+class EpochNewSaleValidation extends ValidationBase
+{
+    protected static function rules(): array
+    {
+        return [
+            'siteId'                                     => 'required|uuid',
+            'siteName'                                   => 'required|string',
+            'amount'                                     => 'required|numeric',
+            'currency'                                   => 'required|string',
+            'tax'                                        => 'array',
+            'payment'                                    => 'required|array',
+            'payment.type'                               => 'required|string',
+            'payment.method'                             => 'nullable|string',
+            'payment.information'                        => 'required|array',
+            'payment.information.member'                 => 'required|array',
+            'payment.information.member.firstName'       => 'nullable|string',
+            'payment.information.member.lastName'        => 'nullable|string',
+            'payment.information.member.userName'        => 'nullable|string',
+            'payment.information.member.password'        => 'nullable|string',
+            'payment.information.member.email'           => 'nullable|string',
+            'payment.information.member.phone'           => 'nullable|string',
+            'payment.information.member.address'         => 'nullable|string',
+            'payment.information.member.zipCode'         => 'nullable|string',
+            'payment.information.member.city'            => 'nullable|string',
+            'payment.information.member.state'           => 'nullable|string',
+            'payment.information.member.country'         => 'nullable|string',
+            'rebill'                                     => 'array',
+            'rebill.amount'                              => 'required_with:rebill|numeric',
+            'rebill.frequency'                           => 'required_with:rebill|integer',
+            'rebill.start'                               => 'required_with:rebill|integer',
+            'tax.initialAmount'                          => 'required_with:tax|array',
+            'tax.initialAmount.beforeTaxes'              => 'required_with:tax.initialAmount|numeric',
+            'tax.initialAmount.taxes'                    => 'required_with:tax.initialAmount|numeric',
+            'tax.initialAmount.afterTaxes'               => 'required_with:tax.initialAmount|numeric|same:amount',
+            'tax.rebillAmount'                           => 'array',
+            'tax.rebillAmount.beforeTaxes'               => 'required_with:tax.rebillAmount|numeric',
+            'tax.rebillAmount.taxes'                     => 'required_with:tax.rebillAmount|numeric',
+            'tax.rebillAmount.afterTaxes'                => 'required_with:tax.rebillAmount|numeric|same:rebill.amount',
+            'tax.taxApplicationId'                       => 'string',
+            'tax.taxName'                                => 'string',
+            'tax.taxRate'                                => 'numeric',
+            'tax.custom'                                 => 'string',
+            'tax.taxType'                                => 'string',
+            'crossSales'                                 => 'array',
+            'crossSales.*.tax'                           => 'array',
+            'crossSales.*.siteId'                        => 'required|string',
+            'crossSales.*.siteName'                      => 'required|string',
+            'crossSales.*.amount'                        => 'required|numeric',
+            'crossSales.*.rebill'                        => 'array',
+            'crossSales.*.rebill.amount'                 => 'required_with:crossSales.*.rebill|numeric',
+            'crossSales.*.rebill.frequency'              => 'required_with:crossSales.*.rebill|integer',
+            'crossSales.*.rebill.start'                  => 'required_with:crossSales.*.rebill|numeric',
+            'crossSales.*.tax.initialAmount'             => 'required_with:crossSales.*.tax|array',
+            'crossSales.*.tax.initialAmount.beforeTaxes' => 'required_with:crossSales.*.tax.initialAmount|numeric',
+            'crossSales.*.tax.initialAmount.taxes'       => 'required_with:crossSales.*.tax.initialAmount|numeric',
+            'crossSales.*.tax.initialAmount.afterTaxes'  => 'required_with:crossSales.*.tax.initialAmount|numeric|same:crossSales.*.amount',
+            'crossSales.*.tax.rebillAmount'              => 'array',
+            'crossSales.*.tax.rebillAmount.beforeTaxes'  => 'required_with:crossSales.*.tax.rebillAmount|numeric',
+            'crossSales.*.tax.rebillAmount.taxes'        => 'required_with:crossSales.*.tax.rebillAmount|numeric',
+            'crossSales.*.tax.rebillAmount.afterTaxes'   => 'required_with:crossSales.*.tax.rebillAmount|numeric|same:crossSales.*.rebill.amount',
+            'crossSales.*.tax.taxApplicationId'          => 'string',
+            'crossSales.*.tax.taxName'                   => 'string',
+            'crossSales.*.tax.taxType'                   => 'string',
+            'crossSales.*.tax.taxRate'                   => 'numeric',
+            'crossSales.*.tax.custom'                    => 'string',
+            'billerFields'                               => 'required|array',
+            'billerFields.clientId'                      => 'required|numeric',
+            'billerFields.clientKey'                     => 'required|string',
+            'billerFields.clientVerificationKey'         => 'required|string',
+            'billerFields.redirect_url'                  => 'required|string',
+            'billerFields.notification_url'              => 'required|string',
+        ];
+    }
+}

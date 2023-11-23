@@ -1,0 +1,3 @@
+{
+  "payload": "{\"TransType\":\"4\",\"Reply\":\"002\",\"TransID\":\"34\",\"Date\":\"30\\/12\\/2020 15:56:02\",\"Order\":\"4ec9c8fd-b482-41a7-a964-cb6947db29ae\",\"Amount\":\"55.30\",\"Payments\":\"1\",\"Currency\":\"1\",\"ConfirmationNum\":\"\",\"Comment\":\"\",\"ReplyDesc\":\"No details\",\"CCType\":\"Visa\",\"Descriptor\":\"\",\"RecurringSeries\":\"\",\"Last4\":\"0000\",\"ccStorageID\":\"\",\"Source\":\"APPROVED\",\"WalletID\":\"\",\"reference\":\"368\",\"signType\":\"SHA256\",\"signature\":\"bQQDCKFU2HIQ7uDRXuh9MuMpB+I3+g3YSs6AjRhTPGM=\"}"
+}

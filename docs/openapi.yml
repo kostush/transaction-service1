@@ -1,0 +1,3202 @@
+openapi: 3.0.3
+servers:
+  - url: 'http://localhost:8003'
+  - url: 'https://stage-ord-transaction-service.probiller.com'
+  - url: 'https://stage-ams-transaction-service.probiller.com'
+  - url: 'https://tests-ord-transaction-service.probiller.com'
+  - url: 'https://tests-ams-transaction-service.probiller.com'
+  - url: 'https://pre-prod-ord-transaction-service.probiller.com'
+  - url: 'https://pre-prod-ams-transaction-service.probiller.com'
+  - url: 'https://ord-transaction-service.probiller.com'
+  - url: 'https://ams-transaction-service.probiller.com'
+tags:
+  - name: Transaction
+    description: Transaction
+info:
+  description: Transaction service API for purchases
+  version: 1.20.6
+  title: Transaction Service API
+  contact:
+    email: probiller_eng_team@mindgeek.com
+paths:
+  '/api/v1/sale/{billerName}/session/{sessionId}':
+    post:
+      tags:
+        - Transaction
+      summary: Create transaction
+      description: Process sales on a given biller.
+      deprecated: true
+      operationId: createTransaction
+      parameters:
+        - $ref: 'transaction.yml#/components/parameters/billerName'
+        - $ref: 'transaction.yml#/components/parameters/sessionId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: 'transaction.yml#/components/schemas/SaleRequestBody'
+      responses:
+        '201':
+          description: |
+            Transaction created either approved or declined by the biller.
+          content:
+            application/json:
+              schema:
+                $ref: 'transaction.yml#/components/schemas/Transaction'
+              examples:
+                ApprovedTransaction:
+                  value:
+                    transactionId: a640b21e-c40b-405a-97f4-08f21b83aec1
+                    status: approved
+                DeclinedTransaction:
+                  value:
+                    transactionId: a640b21e-c40b-405a-97f4-08f21b83aec1
+                    status: declined
+                    code: 303
+                    reason: The bank has declined the transaction.
+                AbortedTransaction:
+                  value:
+                    transactionId: a640b21e-c40b-405a-97f4-08f21b83aec1
+                    status: aborted
+                    code: 305
+                    reason: The transaction failed because applications within the RocketGate servers are unavailable or shutdown
+                PendingThreeDSOneTransaction:
+                  value:
+                    transactionId: dd8895da-44eb-4dab-b27b-3fdaf9ac359b
+                    status: pending
+                    threeD:
+                      version: 1
+                      pareq: SimulatedPAREQ1000173B452AD2F
+                      acs: 'https://dev-secure.rocketgate.com/hostedpage/3DSimulator.jsp'
+                PendingThreeDSTwoTransaction:
+                  value:
+                    transactionId: d2e4b324-0ae0-4e99-b6fe-3cbe116b69e2
+                    status: pending
+                    threeD:
+                      version: 2
+                      deviceCollectionUrl: 'https://centinelapistag.cardinalcommerce.com/V1/Cruise/Collect'
+                      deviceCollectionJWT: eyJhbGciOiJIUzI1NiJ9.eyJ....
+        '400':
+          description: |
+            Invalid payload
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    $ref: 'transaction.yml#/components/schemas/OutputError'
+                example:
+                  error:
+                    code: 20001
+                    message: 'Invalid credit card information: number'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    $ref: 'transaction.yml#/components/schemas/OutputError'
+                example:
+                  error:
+                    code: 0
+                    message: Something went wrong
+  '/api/v1/sale/newCard/{billerName}/session/{sessionId}':
+    post:
+      summary: Create transaction using new credit card
+      description: Process sales on a given biller using a new credit card
+      operationId: createTransactionWithNewCard
+      parameters:
+        - $ref: 'transaction.yml#/components/parameters/billerName'
+        - $ref: 'transaction.yml#/components/parameters/sessionId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: 'transaction.yml#/components/schemas/SaleRequestBody'
+      responses:
+        '201':
+          description: |
+            Transaction created either approved or declined by the biller.
+          content:
+            application/json:
+              schema:
+                $ref: 'transaction.yml#/components/schemas/Transaction'
+              examples:
+                ApprovedTransaction:
+                  value:
+                    transactionId: a640b21e-c40b-405a-97f4-08f21b83aec1
+                    status: approved
+                PendingSimplifiedThreeDSTransaction:
+                  value:
+                    transactionId: a640b21e-c40b-405a-97f4-08f21b83aec1
+                    status: pending
+                    threeD:
+                       paymentLinkUrl: http://payment-link-url
+                PendingThreeDSOneTransaction:
+                  value:
+                    transactionId: 8cdb380f-2784-4b4b-bb12-13ce1d945d4f
+                    status: pending
+                    threeD:
+                      version: 1
+                      pareq: SimulatedPAREQ1000173B487C677
+                      acs: 'https://dev-secure.rocketgate.com/hostedpage/3DSimulator.jsp'
+                DeclinedTransactionNetbilling:
+                  value:
+                    transactionId: a640b21e-c40b-405a-97f4-08f21b83aec1
+                    status: declined
+                    code: 303
+                    reason: The bank has declined the transaction.
+                    errorClassification:
+                      mappingCriteria:
+                        billerName: Netbilling
+                        processor: 'INT/CO#105C4SxCK'
+                        authMessage: DO NOT HONOR
+                      groupDeclined: 104
+                      errorType: Soft
+                      groupMessage: Generic Decline
+                      recommendedAction: Retry or advise customer to contact their bank
+                DeclinedTransactionRocketgate:
+                  value:
+                    transactionId: a640b21e-c40b-405a-97f4-08f21b83aec1
+                    status: declined
+                    code: 303
+                    reason: The bank has declined the transaction.
+                    errorClassification:
+                      mappingCriteria:
+                        billerName: Rocketgate
+                        merchantId: 1345456531
+                        merchantAccount: 10
+                        reasonCode: 1
+                        bankResponseCode: 40120
+                      groupDeclined: 109
+                      errorType: Hard
+                      groupMessage: Card Blocked
+                      recommendedAction: Do not retry
+                AbortedTransaction:
+                  value:
+                    transactionId: a640b21e-c40b-405a-97f4-08f21b83aec1
+                    status: aborted
+                    code: 305
+                    reason: The transaction failed because applications within the RocketGate servers are unavailable or shutdown
+                BinIntelligenceTransaction:
+                  value:
+                    transactionId: d2e4b324-0ae0-4e99-b6fe-3cbe116b69e2
+                    status: pending
+                    threeD:
+                      version: 2
+                      deviceCollectionUrl: 'https://centinelapistag.cardinalcommerce.com/V1/Cruise/Collect'
+                      deviceCollectionJWT: eyJhbGciOiJIUzI1NiJ9.eyJ....
+        '400':
+          description: |
+            Invalid payload
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    $ref: 'transaction.yml#/components/schemas/OutputError'
+                example:
+                  error:
+                    code: 20001
+                    message: 'Invalid credit card information: number'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    $ref: 'transaction.yml#/components/schemas/OutputError'
+                example:
+                  error:
+                    code: 0
+                    message: Something went wrong
+      tags:
+        - Rocketgate
+        - Transaction
+  '/api/v1/sale/existingCard/{billerName}/session/{sessionId}':
+    post:
+      summary: Create transaction using a payment template
+      description: Process sales on a given biller using a payment template
+      operationId: createTransactionWithExistingCard
+      parameters:
+        - $ref: 'transaction.yml#/components/parameters/billerName'
+        - $ref: 'transaction.yml#/components/parameters/sessionId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: 'transaction.yml#/components/schemas/ExistingCardSaleRequestBody'
+      responses:
+        '201':
+          description: |
+            Transaction created either approved or declined by the biller.
+          content:
+            application/json:
+              schema:
+                $ref: 'transaction.yml#/components/schemas/Transaction'
+              examples:
+                ApprovedTransaction:
+                  value:
+                    transactionId: a640b21e-c40b-405a-97f4-08f21b83aec1
+                    status: approved
+                PendingSimplifiedThreeDSTransaction:
+                  value:
+                    transactionId: a640b21e-c40b-405a-97f4-08f21b83aec1
+                    status: pending
+                    threeD:
+                      paymentLinkUrl: http://payment-link-url
+                DeclinedTransactionNetbilling:
+                  value:
+                    transactionId: a640b21e-c40b-405a-97f4-08f21b83aec1
+                    status: declined
+                    code: 303
+                    reason: The bank has declined the transaction.
+                    errorClassification:
+                      mappingCriteria:
+                        billerName: Netbilling
+                        processor: 'INT/CO#105C4SxCK'
+                        authMessage: DO NOT HONOR
+                      groupDeclined: 104
+                      errorType: Soft
+                      groupMessage: Generic Decline
+                      recommendedAction: Retry or advise customer to contact their bank
+                DeclinedTransactionRocketgate:
+                  value:
+                    transactionId: a640b21e-c40b-405a-97f4-08f21b83aec1
+                    status: declined
+                    code: 303
+                    reason: The bank has declined the transaction.
+                    errorClassification:
+                      mappingCriteria:
+                        billerName: Rocketgate
+                        merchantId: 1345456531
+                        merchantAccount: 10
+                        reasonCode: 1
+                        bankResponseCode: 40120
+                      groupDeclined: 109
+                      errorType: Hard
+                      groupMessage: Card Blocked
+                      recommendedAction: Do not retry
+                AbortedTransaction:
+                  value:
+                    transactionId: a640b21e-c40b-405a-97f4-08f21b83aec1
+                    status: aborted
+                    code: 305
+                    reason: The transaction failed because applications within the RocketGate servers are unavailable or shutdown
+        '400':
+          description: |
+            Invalid payload
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    $ref: 'transaction.yml#/components/schemas/OutputError'
+                example:
+                  error:
+                    code: 20001
+                    message: 'Invalid credit card information: number'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    $ref: 'transaction.yml#/components/schemas/OutputError'
+                example:
+                  error:
+                    code: 0
+                    message: Something went wrong
+      tags:
+        - Rocketgate
+        - Transaction
+  '/api/v1/transaction/{transactionId}/rocketgate/completeThreeD/session/{sessionId}':
+    parameters:
+      - $ref: 'transaction.yml#/components/parameters/transactionId'
+      - $ref: 'transaction.yml#/components/parameters/sessionId'
+    put:
+      summary: Complete a 3DS transaction
+      description: Complete a 3DS transaction
+      operationId: completeThreeDTransaction
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: 'transaction.yml#/components/schemas/CompleteThreeDRequestBody'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: 'transaction.yml#/components/schemas/Transaction'
+              examples:
+                SuccessfulTransaction:
+                  value:
+                    transactionId: d2e4b324-0ae0-4e99-b6fe-3cbe116b69e2
+                    status: approved
+                FailedTransaction:
+                  value:
+                    transactionId: d2e4b324-0ae0-4e99-b6fe-3cbe116b69e2
+                    status: declined
+                    code: '104'
+                    reason: The bank has declined the transaction.
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                  error:
+                    type: string
+              examples:
+                InvalidPares:
+                  value:
+                    code: 1005
+                    error: Invalid pares provided
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                  error:
+                    type: string
+              examples:
+                TransactionIdNotFound:
+                  value:
+                    code: 1006
+                    error: 'Previous transaction not found. Transaction id: d2e4b324-0ae0-4e99-b6fe-3cbe116b69e2'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                  error:
+                    type: string
+              examples:
+                AFatalOccured:
+                  value:
+                    code: 1007
+                    error: Error message
+      tags:
+        - Rocketgate
+        - Transaction
+  '/api/v2/transaction/{transactionId}/rocketgate/completeThreeD/session/{sessionId}':
+    parameters:
+      - $ref: 'transaction.yml#/components/parameters/transactionId'
+      - $ref: 'transaction.yml#/components/parameters/sessionId'
+    put:
+      summary: Complete a simplified 3DS transaction
+      description: Complete a simplified 3DS transaction
+      operationId: completeSimplifiedThreeDTransaction
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: 'transaction.yml#/components/schemas/CompleteSimplifiedThreeDRequestBody'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: 'transaction.yml#/components/schemas/Transaction'
+              examples:
+                SuccessfulTransaction:
+                  value:
+                    transactionId: d2e4b324-0ae0-4e99-b6fe-3cbe116b69e2
+                    status: approved
+                    threeD:
+                      version: 1
+                FailedTransaction:
+                  value:
+                    transactionId: d2e4b324-0ae0-4e99-b6fe-3cbe116b69e2
+                    status: declined
+                    code: '104'
+                    reason: The bank has declined the transaction.
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                  error:
+                    type: string
+              examples:
+                InvalidQueryString:
+                  value:
+                    code: 1005
+                    error: Invalid queryString provided
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                  error:
+                    type: string
+              examples:
+                TransactionIdNotFound:
+                  value:
+                    code: 1006
+                    error: 'Previous transaction not found. Transaction id: d2e4b324-0ae0-4e99-b6fe-3cbe116b69e2'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                  error:
+                    type: string
+              examples:
+                AFatalOccured:
+                  value:
+                    code: 1007
+                    error: Error message
+      tags:
+        - Rocketgate
+        - Transaction
+  '/api/v1/transaction/{transactionId}/session/{sessionId}':
+    get:
+      tags:
+        - Transaction
+      summary: Retrieve transaction data
+      operationId: retrieveTransaction
+      parameters:
+        - $ref: 'transaction.yml#/components/parameters/transactionId'
+        - $ref: 'transaction.yml#/components/parameters/sessionId'
+      responses:
+        '200':
+          description: Retrieve transaction data
+          content:
+            application/json:
+              schema:
+                $ref: 'transaction.yml#/components/schemas/retrieveTransaction'
+              examples:
+                RocketgateTransaction:
+                  value:
+                    biller_id: 23131
+                    merchant_id: '*********'
+                    merchant_password: '*********'
+                    invoice_id: 4165c1cddd83a9cb8.99590556
+                    customer_id: 4165c1cddd82cce24.92280817
+                    card_hash: m77xlHZiPKVsF9p1/VdzTb+CUwaGBDpuSRxtcb7+j24=
+                    biller_transaction_id: 1000168A8FCBC67
+                    biller_member_id: '5698523654'
+                    currency: USD
+                    site_id: 8051d60a-7fb0-4ef2-8e60-968eee79c104
+                    payment_type: cc
+                    merchant_account: 1
+                    card_expiration_year: 2022
+                    card_expiration_month: 12
+                    card_description: CREDIT
+                    member:
+                      email: gisele.framboise@fruity.com
+                      phone_number: 514 222-5555
+                      first_name: Gisele
+                      last_name: Framboise
+                      address: 7777 Decarie
+                      city: Montreal
+                      state: QC
+                      zip: H1H1H1
+                      country: CA
+                    transaction:
+                      transaction_id: fb5701f3-ef18-4ee1-8203-4b67328fc7fd
+                      first6: '******'
+                      last4: '****'
+                      amount: 123.4
+                      created_at: '2019-02-01 12:16:01'
+                      rebill_amount: 29.99
+                      rebill_frequency: 30
+                      rebill_start: 30
+                      status: approved
+                      code: 105
+                      reason: The bank has declined the transaction because the account is over limit
+                      payment_detailed_information:
+                        card_hash: string
+                        first_six: string
+                        last_four: string
+                    billerTransactions:
+                      - invoice_id: 4165c1cddd83a9cb8.99590556
+                        customer_id: 4165c1cddd82cce24   .92280817
+                        card_hash: m77xlHZiPKVsF9p1/VdzTb+CUwaGBDpuSRxtcb7+j24=
+                        biller_transaction_id: 1000168A8FCBC67
+                        biller_member_id: '5698523654'
+                        type: auth
+                      - invoice_id: 4165c1cddd83a9cb8.99590556
+                        customer_id: 4165c1cddd82cce24   .92280817
+                        card_hash: m77xlHZiPKVsF9p1/VdzTb+CUwaGBDpuSRxtcb7+j24=
+                        biller_transaction_id: 1000168A8FCBC67
+                        biller_member_id: '5698523654'
+                        type: sale
+                    securedWithThreeD: true
+                    threeDSecuredVersion: 1
+                    previousTransactionId: fb5701f3-ef18-4ee1-8203-4b67328fc7fd
+                NetbillingTransaction:
+                  value:
+                    biller_id: '23424'
+                    merchant_id: ''
+                    merchant_password: ''
+                    invoice_id: ''
+                    customer_id: ''
+                    card_hash: A8SDTGASGDA8SDGAS8D=
+                    biller_transaction_id: '114255120981'
+                    transaction:
+                      transaction_id: 0826c4d9-b556-4b20-93bd-0bbc687076ca
+                      amount: '187.6'
+                      created_at: '2020-04-17 20:03:43'
+                      rebill_amount: '187.6'
+                      rebill_frequency: '44'
+                      rebill_start: '33'
+                      status: approved
+                      code: 105
+                      reason: The bank has declined the transaction because the account is over limit
+                      first6: '463316'
+                      last4: 955
+                    transaction_id: '114255120981'
+                    currency: USD
+                    site_id: ''
+                    payment_type: cc
+                    member:
+                      email: gisele.framboise@fruity.com
+                      phone_number: 514 222-5555
+                      first_name: Gisele
+                      last_name: Framboise
+                      address: 7777 Decarie
+                      city: Montreal
+                      state: QC
+                      zip: H1H1H1
+                      country: CA
+                    card_expiration_year: 2021
+                    card_expiration_month: 1
+                    biller_member_id: '114008706885'
+                    bin_routing: IAS87DYA78SDEP
+                EpochTransaction:
+                  value:
+                    site_id: 8e34c94e-135f-4acb-9141-58b3a6e56c74
+                    biller_id: '23425'
+                    transaction:
+                      transaction_id: 0f83faea-165f-4f49-ad3b-83ea1e0bab50
+                      amount: '14.97'
+                      created_at: '2020-05-28 11:03:58'
+                      rebill_amount: '10'
+                      rebill_frequency: '365'
+                      rebill_start: '30'
+                      status: approved
+                      first6: ''
+                      last4: ''
+                      card_expiration_year: ''
+                      card_expiration_month: ''
+                    payment_type: cc
+                    payment_method: visa
+                    member:
+                      email: user@mindgeek.com
+                      name: name
+                      zip: '123456'
+                      country: RO
+                    biller_settings:
+                      clientId: '1234'
+                      clientKey: clientKey
+                      clientVerificationKey: clientVerificationKey
+                      redirectUrl: 'http://purchase-gateway.probiller.com/api/v1/purchase/thirdParty/return/{jwt}'
+                      notificationUrl: 'https://postback-gateway.probiller.com/api/postbacks/{UUID}'
+                      invoiceId: 008149f3-da95-4792-beeb-ce6f1dee9522
+                    currency: USD
+                    biller_transactions:
+                      - pi_code: InvoiceProduct7919
+                        biller_transaction_id: '1201415378'
+                        biller_member_id: '2342235562'
+                    ans: 'Y011371NM |2342235562'
+                QyssoTransaction:
+                  value:
+                    site_id: 8e34c94e-135f-4acb-9141-58b3a6e56c74
+                    biller_id: '23427'
+                    transaction:
+                      transaction_id: 0f83faea-165f-4f49-ad3b-83ea1e0bab50
+                      amount: '14.97'
+                      created_at: '2020-05-28 11:03:58'
+                      rebill_amount: '10'
+                      rebill_frequency: '365'
+                      rebill_start: '30'
+                      status: approved
+                      first6: ''
+                      last4: ''
+                      card_expiration_year: ''
+                      card_expiration_month: ''
+                    payment_type: banktransfer
+                    payment_method: zelle
+                    member:
+                      email: user@mindgeek.com
+                      name: name
+                      zip: '123456'
+                      country: RO
+                    biller_settings:
+                      companyNum: '1234'
+                      personalHashKey: hashkey
+                      redirectUrl: 'http://purchase-gateway.probiller.com/api/v1/purchase/thirdParty/return/{jwt}'
+                      notificationUrl: 'https://postback-gateway.probiller.com/api/postback/{receiverId}/session/{sessionId}'
+                    currency: USD
+                    biller_transactions:
+                      - company_num: 1234
+                        biller_transaction_id: '5'
+                        type: 'charge'
+                        raw_biller_response: {}
+                    biller_transaction_id: '5'
+                QyssoRebillTransaction:
+                  value:
+                    site_id: 8e34c94e-135f-4acb-9141-58b3a6e56c74
+                    biller_id: '23427'
+                    transaction:
+                      transaction_id: 0f83faea-165f-4f49-ad3b-83ea1e0bab50
+                      amount: '14.97'
+                      created_at: '2020-05-28 11:03:58'
+                      rebill_amount: '10'
+                      rebill_frequency: '365'
+                      rebill_start: '30'
+                      status: approved
+                      first6: ''
+                      last4: ''
+                      card_expiration_year: ''
+                      card_expiration_month: ''
+                    payment_type: banktransfer
+                    payment_method: zelle
+                    member:
+                      email: user@mindgeek.com
+                      name: name
+                      zip: '123456'
+                      country: RO
+                    biller_settings:
+                      companyNum: '1234'
+                      personalHashKey: hashkey
+                      redirectUrl: 'http://purchase-gateway.probiller.com/api/v1/purchase/thirdParty/return/{jwt}'
+                      notificationUrl: 'https://postback-gateway.probiller.com/api/postback/{receiverId}/session/{sessionId}'
+                    currency: USD
+                    biller_transactions:
+                      - company_num: 1234
+                        biller_transaction_id: '5'
+                        initial_biller_transaction_id: '5'
+                        type: 'rebill'
+                        raw_biller_response: {}
+                    biller_transaction_id: '5'
+                LegacyTransaction:
+                  value:
+                    biller_id: '23425'
+                    site_id: 8e34c94e-135f-4acb-9141-58b3a6e56c75
+                    currency: CAD
+                    payment_type: cc
+                    payment_method: visa
+                    transaction:
+                      transaction_id: 0f83faea-165f-4f49-ad3b-83ea1e0bab00
+                      amount: '14.97'
+                      created_at: '2020-05-28 11:03:58'
+                      rebill_amount: '10'
+                      rebill_frequency: '365'
+                      rebill_start: '30'
+                      status: approved
+                      legacy_transaction_id: '583545066'
+                      legacy_member_id: '145106107'
+                      legacy_subscription_id: '177460261'
+                      first6: ''
+                      last4: ''
+                      card_expiration_year: ''
+                      card_expiration_month: ''
+                    member:
+                      email: gisele.framboise@fruity.com
+                      phone_number: 514 222-5555
+                      first_name: Gisele
+                      last_name: Framboise
+                      address: 7777 Decarie
+                      city: Montreal
+                      state: QC
+                      zip: H1H1H1
+                      country: CA
+                    biller_settings:
+                      billerId: '23426'
+                      billerName: Legacy
+                      returnUrl: 'https://stage3-ord.probiller.com/mcp/tools/response/result/true/domain/www.brazzers.com'
+                      postbackUrl: 'http://postback-purchase-gateway/api/v1/purchase/thirdParty/return/1235'
+                      others: []
+                    biller_transactions:
+                      - payload:
+                          payment:
+                            type: cc
+                            method: visa
+                            information:
+                              member:
+                                firstName: Obrean
+                                lastName: TBrian
+                                userName: transtest09
+                                password: test1234
+                                email: probiller.transtest09@test.mindgeek.com
+                                phone: 514 000-0000
+                                address: 7777 Decarie
+                                zipCode: H1H1H1
+                                city: Montreal
+                                state: QC
+                                country: CA
+                          charges:
+                            - amount: 1.43
+                              currency: USD
+                              productId: 33503
+                              isMainPurchase: true
+                              rebill:
+                                amount: 10
+                                frequency: 30
+                                start: 7
+                              tax:
+                                initialAmount:
+                                  beforeTaxes: 1
+                                  taxes: 1
+                                  afterTaxes: 1.43
+                                rebillAmount:
+                                  beforeTaxes: 10
+                                  taxes: 0.5
+                                  afterTaxes: 10
+                                taxApplicationId: 60bf5bcb-ac64-496c-acc5-9c7cf54a1869
+                                taxName: VAT
+                                taxRate: 0.05
+                                taxType: vat
+                                displayChargedAmount: true
+                            - amount: 1.45
+                              currency: USD
+                              productId: 5903
+                              isMainPurchase: false
+                              rebill:
+                                amount: 10
+                                frequency: 30
+                                start: 7
+                              tax:
+                                initialAmount:
+                                  beforeTaxes: 1
+                                  taxes: 1
+                                  afterTaxes: 1.45
+                                rebillAmount:
+                                  beforeTaxes: 10
+                                  taxes: 0.5
+                                  afterTaxes: 10
+                                taxApplicationId: 60bf5bcb-ac64-496c-acc5-9c7cf54a1869
+                                taxName: VAT
+                                taxRate: 0.05
+                                taxType: vat
+                                displayChargedAmount: true
+                          billerFields:
+                            billerName: rocketgate
+                            isCcAuth: false
+                            returnUrl: 'https://stage3-ord.probiller.com/mcp/tools/response/result/true/domain/www.brazzers.com'
+                        type: request
+                      - payload:
+                          redirectUrl: 'https://stage3-ord.probiller.com/site/Purchase/default/domain/www.brazzers.com'
+                          traceId: 40c29ef3-4a20-45aa-a074-3044f81fcd58
+                          sessionId: 1047572a-cfe8-4a10-829b-1839103bd022
+                          correlationId: 159e3e72-a5c7-417c-b1f5-961b00190138
+                        type: response
+        '404':
+          description: Transaction not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    $ref: 'transaction.yml#/components/schemas/OutputError'
+                example:
+                  error:
+                    code: 1003
+                    message: Transaction not found
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    $ref: 'transaction.yml#/components/schemas/OutputError'
+                example:
+                  error:
+                    code: 0
+                    message: Something went wrong
+      description: Retrieve transaction details
+  '/api/v1/transaction/{transactionId}/abort':
+    put:
+      tags:
+        - Transaction
+      summary: Marks a pending transaction as aborted
+      description: Marks a pending transaction as aborted.
+      operationId: abortTransaction
+      parameters:
+        - $ref: 'transaction.yml#/components/parameters/transactionId'
+        - schema:
+            type: string
+          in: header
+          name: X-CORRELATION-ID
+          description: Correlation Id
+      responses:
+        '200':
+          description: Transaction was marked as approved.
+          content:
+            application/json:
+              schema:
+                $ref: 'transaction.yml#/components/schemas/abortTransactionResponse'
+        '400':
+          description: Transaction Already Processed.
+          content:
+            application/json:
+              schema:
+                $ref: 'transaction.yml#/components/schemas/OutputError'
+              example:
+                code: 3032
+                message: Transaction with id a0c35f53-6992-47b7-980a-4716b486bf23 was already processed
+        '404':
+          description: Transaction not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    $ref: 'transaction.yml#/components/schemas/OutputError'
+                example:
+                  error:
+                    code: 1003
+                    message: Transaction not found
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: 'transaction.yml#/components/schemas/OutputError'
+              example:
+                code: 0
+                message: Something went wrong
+  '/api/v1/cancelRebill/rocketgate/session/{sessionId}':
+    post:
+      summary: Cancel Rebill
+      operationId: cancelRebill
+      parameters:
+        - $ref: 'transaction.yml#/components/parameters/sessionId'
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  transactionId:
+                    type: string
+                  status:
+                    type: string
+                  code:
+                    type: string
+                  reason:
+                    type: string
+                required:
+                  - transactionId
+                  - status
+              examples:
+                Transaction-was-created-and-rebill-suspend-request-was-accepted-by-the-biller:
+                  value:
+                    transactionId: a640b21e-c40b-405a-97f4-08f21b83aec1
+                    status: approved
+                Transaction-is-created-but-is-declined-by-Rocketgate:
+                  value:
+                    transactionId: ee28e0ac-7805-442f-bc7a-8e38ae636f98
+                    status: declined
+                    code: 420
+                    reason: 'Invalid data in one of the rebill parameters, or an invalid combination of the rebill parameters'
+                Transaction-is-created-but-Rocketgate-provides-a-generic-error-or-times-out:
+                  value:
+                    transactionId: a95d86bc-4316-4dc5-afd0-8c8c839bf7b2
+                    status: aborted
+                    code: 305
+                    reason: The transaction failed because applications within the RocketGate servers are unavailable or shutdown
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: string
+                  message:
+                    type: string
+                  error:
+                    type: string
+                  transactionId:
+                    type: string
+                  status:
+                    type: string
+                  reason:
+                    type: string
+                required:
+                  - code
+              examples:
+                Invalid-payload:
+                  value:
+                    code: 1234
+                    error: Invalid request
+                Transaction-is-created-but-merchantCustomerId-is-not-found-by-the-biller:
+                  value:
+                    transactionId: a640b21e-c40b-405a-97f4-08f21b83aec1
+                    status: declined
+                    code: 414
+                    reason: Invalid or missing customer ID
+                Transaction-is-created-but-merchantCustomerId-is-not-associated-to-a-recurring-charge-by-the-biller:
+                  value:
+                    transactionId: 69334e52-cfc0-4290-9544-bc550b68e768
+                    status: declined
+                    code: 448
+                    reason: The membership record was found but not active
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: string
+                  error:
+                    type: string
+              examples:
+                Transaction-Service-is-experiencing-a-fatal-error:
+                  value:
+                    code: 0
+                    error: Something went wrong
+      description: Cancel Rebill
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                transactionId:
+                  type: string
+                merchantId:
+                  type: string
+                merchantPassword:
+                  type: string
+                merchantCustomerId:
+                  type: string
+                merchantInvoiceId:
+                  type: string
+              required:
+                - transactionId
+                - merchantId
+                - merchantPassword
+                - merchantCustomerId
+                - merchantInvoiceId
+            examples:
+              Transaction-was-created-and-rebill-suspend-request-was-accepted-by-the-biller:
+                value:
+                  transactionId: 3771662f-8cfa-4c62-a740-59369e762d7c
+                  merchantId: '86634'
+                  merchantPassword: 7xty2gfa35g6
+                  merchantCustomerId: 4165c1cddd82cce24.92280817
+                  merchantInvoiceId: 4165c1cddd83a9cb8.99590556
+              Transaction-is-created-but-is-declined-by-Rocketgate:
+                value:
+                  transactionId: e3c6682c-9e92-480b-8c62-d18ebd70ee0c
+                  merchantId: '86634'
+                  merchantPassword: 7xty2gfa35g6
+                  merchantCustomerId: 4165c1cddd82cce24.92280817
+                  merchantInvoiceId: 4165c1cddd83a9cb8.99590556
+              Transaction-is-created-but-Rocketgate-provides-a-generic-error-or-times-out:
+                value:
+                  transactionId: 25f578e4-b5a5-4aa6-bbe4-a106056d10a7
+                  merchantId: '86634'
+                  merchantPassword: 7xty2gfa35g6
+                  merchantCustomerId: 4165c1cddd82cce24.92280817
+                  merchantInvoiceId: 4165c1cddd83a9cb8.99590556
+              Invalid-payload:
+                value:
+                  transactionId: c8b17215-5898-4c35-b13b-cad8403ff6ac
+                  merchantId: '86634'
+                  merchantPassword: 7xty2gfa35g6
+              Transaction-is-created-but-merchantCustomerId-is-not-found-by-the-biller:
+                value:
+                  transactionId: c0aace0c-cc7a-4c96-871a-fa294aeffdd1
+                  merchantId: '86634'
+                  merchantPassword: 7xty2gfa35g6
+                  merchantCustomerId: 4165c1cddd82cce24.92280817
+                  merchantInvoiceId: 4165c1cddd83a9cb8.99590556
+              Transaction-is-created-but-MerchantCustomerId-is-not-associated-to-a-recurring-charge-by-the-biller:
+                value:
+                  transactionId: 88f1d030-e762-42d7-8953-da8e0e8d9c5b
+                  merchantId: '86634'
+                  merchantPassword: 7xty2gfa35g6
+                  merchantCustomerId: 4165c1cddd82cce24.92280817
+                  merchantInvoiceId: 4165c1cddd83a9cb8.99590556
+              Transaction-Service-is-experiencing-a-fatal-error:
+                value:
+                  transactionId: b67b003e-c3d0-423a-8c12-1f5a39b05df4
+                  merchantId: '86634'
+                  merchantPassword: 7xty2gfa35g6
+                  merchantCustomerId: 4165c1cddd82cce24.92280817
+                  merchantInvoiceId: 4165c1cddd83a9cb8.99590556
+        description: Cancel Rebill body request
+      tags:
+        - Rocketgate
+        - Transaction
+  '/api/v1/threeds-lookup/{billerName}/session/{sessionId}':
+    put:
+      tags:
+        - Transaction
+      summary: Performs a lookup operation for 3ds 2
+      description: Performs a lookup operation for 3ds 2.
+      operationId: threedsLookup
+      parameters:
+        - $ref: 'transaction.yml#/components/parameters/billerName'
+        - $ref: 'transaction.yml#/components/parameters/sessionId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: 'transaction.yml#/components/schemas/LookupRequestBody'
+      responses:
+        '201':
+          description: |
+            Transaction created either approved or pending by the biller.
+          content:
+            application/json:
+              schema:
+                $ref: 'transaction.yml#/components/schemas/Transaction'
+              examples:
+                ApprovedFrictionless:
+                  value:
+                    transactionId: a640b21e-c40b-405a-97f4-08f21b83aec1
+                    status: approved
+                ThreeDS2AuthRequired:
+                  value:
+                    transactionId: a640b21e-c40b-405a-97f4-08f21b83aec1
+                    status: pending
+                    threeD:
+                      version: 2
+                      md: '<rocketgate_biller_transaction_id>'
+                      stepUpUrl: 'https://dev-secure.rocketgate.com/hostedpage/3DSimulator_2_0.jsp'
+                      stepUpJwt: eyJhbGciOiJIUzI1NiJ9.eyJqdGkiOiI3MjA1OTE4NzgyNTk3NjM0NSIsImlhdCI6MTU5Mzc4ODA0OCwiaXNzIjoiNWNmYTVhMDFhZmE4MGQyMjUwZmQzMTc5IiwiT3JnVW5pdElkIjoiNWNmNzA2OWRiYjg3NjgxOTZjMTBhNGU5In0.Xs_zq65Z8af1u38tUdO9be1liZ7LN8PiCzRSAjVz6Lg
+                ThreeDS1FallbackAuthRequired:
+                  value:
+                    transactionId: a640b21e-c40b-405a-97f4-08f21b83aec1
+                    status: pending
+                    threeD:
+                      version: 1
+                      pareq: SimulatedPAREQ100016FF154A833
+                      acs: 'https://dev1.rocketgate.com/hostedpage/3DSimulator.jsp'
+                DeclinedTransaction:
+                  value:
+                    transactionId: a640b21e-c40b-405a-97f4-08f21b83aec0
+                    status: declined
+                    code: 303
+                    reason: The bank has declined the transaction.
+                AbortedTransaction:
+                  value:
+                    transactionId: a640b21e-c40b-405a-97f4-08f21b83aec1
+                    status: aborted
+                    code: 305
+                    reason: The transaction failed because applications within the RocketGate servers are unavailable or shutdown
+        '400':
+          description: |
+            Invalid payload
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    $ref: 'transaction.yml#/components/schemas/OutputError'
+                example:
+                  error:
+                    code: 20001
+                    message: 'Invalid credit card information: number'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    $ref: 'transaction.yml#/components/schemas/OutputError'
+                example:
+                  error:
+                    code: 0
+                    message: Something went wrong
+  '/api/v1/pumapay/qrCode':
+    post:
+      summary: Retrieve QR code and create a pending transaction
+      description: Retrieve QR code and create a pending transaction
+      operationId: retrieveQrCode
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: 'transaction.yml#/components/schemas/retrieveQrCodeRequestBody'
+            examples:
+              single-charge:
+                value:
+                  siteId: e34ca48c-3380-11e9-b210-d663bd873d93
+                  billerId: 12345
+                  currency: EUR
+                  amount: 29.99
+                  billerFields:
+                    businessId: xxx
+                    businessModel: xxx
+                    apiKey: xxx
+                    title: title
+                    description: description
+              recurring-charge:
+                value:
+                  siteId: e34ca48c-3380-11e9-b210-d663bd873d93
+                  billerId: 12345
+                  currency: EUR
+                  amount: 29.99
+                  rebill:
+                    amount: 19.99
+                    frequency: 30
+                    start: 10
+                  billerFields:
+                    businessId: xxx
+                    businessModel: xxx
+                    apiKey: xxx
+                    title: title
+                    description: description
+              with-transaction-id:
+                value:
+                  siteId: e34ca48c-3380-11e9-b210-d663bd873d93
+                  transactionId: ad2e2c89-32fb-4b6e-b72e-a96eee643ea4
+                  billerId: 12345
+                  currency: EUR
+                  amount: 29.99
+                  billerFields:
+                    businessId: xxx
+                    businessModel: xxx
+                    apiKey: xxx
+                    title: title
+                    description: description
+      responses:
+        '201':
+          description: Transaction created having the status as pending.
+          content:
+            application/json:
+              schema:
+                $ref: 'transaction.yml#/components/schemas/QrCode'
+              examples:
+                qr-code-generated:
+                  value:
+                    transactionId: uuid
+                    status: pending
+                    qrCode: base64-string-encoded
+                    encryptText: string
+                pumapay-server-error:
+                  value:
+                    transactionId: uuid
+                    status: aborted
+                    code: xxx
+                    error: xxx
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: 'transaction.yml#/components/schemas/OutputError'
+              examples:
+                invalid-payload:
+                  value:
+                    code: 0
+                    error: Bad request
+                pumapay-bad-request:
+                  value:
+                    transactionId: uuid
+                    status: aborted
+                    code: 0
+                    error: Bad request
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: 'transaction.yml#/components/schemas/OutputError'
+              example:
+                code: 0
+                message: Something went wrong
+      tags:
+        - Pumapay
+        - Transaction
+  '/api/v1/transaction/{transactionId}/pumapay/billerInteraction':
+    put:
+      summary: Add a biller interaction and change transaction state
+      description: Add a biller interaction and change transaction state. The payload was shorten because it is too large and displays only the required fields by PumaPay library.
+      operationId: addBillerInteractionForJoin
+      parameters:
+        - $ref: 'transaction.yml#/components/parameters/transactionId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: 'transaction.yml#/components/schemas/addBillerInteractionForJoinRequestBody'
+      responses:
+        '200':
+          description: Biller interaction added and transaction state changed.
+          content:
+            application/json:
+              schema:
+                $ref: 'transaction.yml#/components/schemas/billerInteractionForJoinResponse'
+        '400':
+          description: Invalid payload
+          content:
+            application/json:
+              schema:
+                $ref: 'transaction.yml#/components/schemas/OutputError'
+              example:
+                code: 0
+                message: Bad request
+        '404':
+          description: Transaction not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    $ref: 'transaction.yml#/components/schemas/OutputError'
+                example:
+                  error:
+                    code: 1003
+                    message: Transaction not found
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: 'transaction.yml#/components/schemas/OutputError'
+              example:
+                code: 0
+                message: Something went wrong
+      tags:
+        - Pumapay
+        - Transaction
+  '/api/v1/pumapay/rebill/billerInteraction':
+    post:
+      summary: Add a biller interaction and for rebill postback
+      description: Add a biller interaction for rebill postback. The payload was shorten because it is too large and displays only the required fields by PumaPay library.
+      operationId: addBillerInteractionForRebill
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: 'transaction.yml#/components/schemas/addBillerInteractionForRebillRequestBody'
+      responses:
+        '201':
+          description: Biller interaction added and transaction created.
+          content:
+            application/json:
+              schema:
+                $ref: 'transaction.yml#/components/schemas/billerInteractionForRebillResponse'
+              examples:
+                approved-transaction:
+                  value:
+                    transactionId: uuid
+                    status: approved
+                declined-transaction:
+                  value:
+                    transactionId: uuid
+                    status: declined
+                    code: 0
+                    reason: reason
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: 'transaction.yml#/components/schemas/OutputError'
+              examples:
+                Invalid-payload:
+                  value:
+                    code: 0
+                    message: Bad request
+                Previous-transaction-does-not-support-rebill:
+                  value:
+                    code: 0
+                    message: Previous transaction status does not support rebill.
+                Previous-transaction-not-found:
+                  value:
+                    code: 0
+                    message: Previous transaction not found.
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: 'transaction.yml#/components/schemas/OutputError'
+              example:
+                code: 0
+                message: Something went wrong
+      tags:
+        - Pumapay
+        - Transaction
+  '/api/v1/pumapay/cancelRebill':
+    post:
+      summary: Pumapay - Cancel Rebil
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  transactionId:
+                    type: string
+                    example: a640b21e-c40b-405a-97f4-08f21b83aec1
+                  status:
+                    type: string
+                    example: declined
+                  code:
+                    type: string
+                    example: xxx
+                  reason:
+                    type: string
+                    example: Transaction was created but the rebill suspend request was not accepted by the biller
+                required:
+                  - transactionId
+                  - status
+              examples:
+                Transaction-was-created-and-rebill-suspend-request-was-accepted-by-the-biller:
+                  value:
+                    transactionId: a640b21e-c40b-405a-97f4-08f21b83aec1
+                    status: approved
+                Transaction-was-created-but-the-rebill-suspend-request-was-not-accepted-by-the-biller:
+                  value:
+                    transactionId: a640b21e-c40b-405a-97f4-08f21b83aec1
+                    status: declined
+                    code: xxx
+                    reason: Transaction was created but the rebill suspend request was not accepted by the biller
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: string
+                  error:
+                    type: string
+              examples:
+                Invalid-payload:
+                  value:
+                    code: xxx
+                    error: Invalid request
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: string
+                  error:
+                    type: string
+              examples:
+                Transaction-Service-is-experiencing-a-fatal-error:
+                  value:
+                    code: xxx
+                    error: server problem
+      description: Cancel rebill from pumapay
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                transactionId:
+                  type: string
+                  example: 3771662f-8cfa-4c62-a740-59369e762d7c
+                billerFields:
+                  type: object
+                  required:
+                    - businessId
+                    - businessModel
+                    - apiKey
+                  properties:
+                    businessId:
+                      type: string
+                      example: xxx
+                    businessModel:
+                      type: string
+                      example: xxx
+                    apiKey:
+                      type: string
+                      example: xxx
+              required:
+                - transactionId
+                - billerFields
+            examples:
+              Transaction-was-created-and-rebill-suspend-request-was-accepted-by-the-biller:
+                value:
+                  transactionId: 3771662f-8cfa-4c62-a740-59369e762d7c
+                  billerFields:
+                    businessId: xxx
+                    businessModel: xxx
+                    apiKey: xxx
+              Transaction-was-created-but-the-rebill-suspend-request-was-not-accepted-by-the-biller:
+                value:
+                  transactionId: a640b21e-c40b-405a-97f4-08f21b83aec1
+                  billerFields:
+                    businessId: xxx
+                    businessModel: xxx
+                    apiKey: xxx
+              Invalid-payload:
+                value:
+                  transactionId: ''
+                  billerFields:
+                    businessId: xxx
+                    businessModel: xxx
+                    apiKey: xxx
+              Transaction-Service-is-experiencing-a-fatal-error:
+                value:
+                  transactionId: 3771662f-8cfa-4c62-a740-59369e762d1a
+                  billerFields:
+                    businessId: xxx
+                    businessModel: xxx
+                    apiKey: xxx
+        description: Cancel Pumapay rebill
+      tags:
+        - Pumapay
+        - Transaction
+  '/api/v1/sale/newCard/netbilling/session/{sessionId}':
+    post:
+      tags:
+        - Netbilling
+      summary: Create transaction using new credit card
+      description: Process sales on a new credit card for Netbilling
+      operationId: createTransactionNetbillingWithNewCard
+      parameters:
+        - $ref: 'transaction.yml#/components/parameters/billerName'
+        - $ref: 'transaction.yml#/components/parameters/sessionId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: 'transaction.yml#/components/schemas/NetBillingSaleRequestBody'
+      responses:
+        '201':
+          description: |
+            Transaction created either approved or declined by the netbilling.
+          content:
+            application/json:
+              schema:
+                $ref: 'transaction.yml#/components/schemas/Transaction'
+              examples:
+                ApprovedTransaction:
+                  value:
+                    transactionId: a640b21e-c40b-405a-97f4-08f21b83aec0
+                    status: approved
+                DeclinedTransaction:
+                  value:
+                    transactionId: a640b21e-c40b-405a-97f4-08f21b83aec0
+                    status: declined
+                    code: 303
+                    reason: The bank has declined the transaction.
+                AbortedTransaction:
+                  value:
+                    transactionId: a640b21e-c40b-405a-97f4-08f21b83aec0
+                    status: aborted
+                    code: 305
+                    reason: The transaction failed because applications within the Netbilling servers are unavailable or shutdown
+        '400':
+          description: |
+            Invalid payload
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    $ref: 'transaction.yml#/components/schemas/OutputError'
+                example:
+                  error:
+                    code: 20001
+                    message: 'Invalid credit card information: number'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    $ref: 'transaction.yml#/components/schemas/OutputError'
+                example:
+                  error:
+                    code: 0
+                    message: Something went wrong
+  '/api/v1/sale/existingCard/netbilling/session/{sessionId}':
+    post:
+      tags:
+        - Netbilling
+      summary: Create transaction using a payment template for netbilling
+      description: Process sales on netbilling biller using a payment template
+      operationId: createTransactionNetbillingWithExistingCard
+      parameters:
+        - $ref: 'transaction.yml#/components/parameters/billerName'
+        - $ref: 'transaction.yml#/components/parameters/sessionId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: 'transaction.yml#/components/schemas/NetbillingExistingCardSaleRequestBody'
+      responses:
+        '201':
+          description: |
+            Transaction created either approved or declined by the netbilling.
+          content:
+            application/json:
+              schema:
+                $ref: 'transaction.yml#/components/schemas/Transaction'
+              examples:
+                ApprovedTransaction:
+                  value:
+                    transactionId: a640b21e-c40b-405a-97f4-08f21b83aec1
+                    status: approved
+                DeclinedTransaction:
+                  value:
+                    transactionId: a640b21e-c40b-405a-97f4-08f21b83aec1
+                    status: declined
+                    code: 303
+                    reason: The bank has declined the transaction.
+                AbortedTransaction:
+                  value:
+                    transactionId: a640b21e-c40b-405a-97f4-08f21b83aec1
+                    status: aborted
+                    code: 305
+                    reason: The transaction failed because applications within the Netbilling servers are unavailable or shutdown
+        '400':
+          description: |
+            Invalid payload
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    $ref: 'transaction.yml#/components/schemas/OutputError'
+                example:
+                  error:
+                    code: 20001
+                    message: 'Invalid credit card information: number'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    $ref: 'transaction.yml#/components/schemas/OutputError'
+                example:
+                  error:
+                    code: 0
+                    message: Something went wrong
+  '/api/v1/healthCheck':
+    get:
+      tags:
+        - Transaction health check
+      summary: Retrieve transaction health check
+      operationId: retrieveTransactionHealth
+      responses:
+        '200':
+          description: Retrieve transaction health data
+          content:
+            application/json:
+              schema:
+                $ref: 'transaction.yml#/components/schemas/retrieveTransactionHealth'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    $ref: 'transaction.yml#/components/schemas/OutputError'
+                example:
+                  error:
+                    code: 0
+                    message: Something went wrong
+  '/api/v1/updateRebill/rocketgate/session/{sessionId}':
+    post:
+      summary: Update Rebill
+      operationId: updateRebill
+      parameters:
+        - $ref: 'transaction.yml#/components/parameters/sessionId'
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: 'transaction.yml#/components/schemas/Transaction'
+              examples:
+                Transaction-was-created-and-rebill-update-request-was-accepted-by-Rocketgate:
+                  value:
+                    transactionId: 5fa02765-69a8-4a54-9780-86ec9d5ec307
+                    status: approved
+                Transaction-is-created-but-is-declined-by-Rocketgate:
+                  value:
+                    transactionId: 7fda2903-0e80-470d-a5ee-84dff9da130c
+                    status: declined
+                    code: 420
+                    reason: 'Invalid data in one of the rebill parameters, or an invalid combination of the rebill parameters'
+                    errorClassification:
+                      mappingCriteria:
+                        billerName: Rocketgate
+                        merchantId: 1345456531
+                        merchantAccount: 10
+                        reasonCode: 1
+                        bankResponseCode: 40120
+                      groupDeclined: 109
+                      errorType: Hard
+                      groupMessage: Card Blocked
+                      recommendedAction: Do not retry
+                Transaction-is-created-but-Rocketgate-provides-a-generic-error-or-times-out:
+                  value:
+                    transactionId: 6dd4a6f7-a39e-42b1-955c-8cd2199acbd4
+                    status: aborted
+                    code: 305
+                    reason: The transaction failed because applications within the RocketGate servers are unavailable or shutdown
+                    errorClassification:
+                      mappingCriteria:
+                        billerName: Rocketgate
+                        merchantId: 1345456531
+                        merchantAccount: 10
+                        reasonCode: 1
+                        bankResponseCode: 40120
+                      groupDeclined: 9999
+                      errorType: Error
+                      groupMessage: Group decline message not configured
+                      recommendedAction: Recommended action is not configured
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: 'transaction.yml#/components/schemas/Transaction'
+              examples:
+                Invalid-payload:
+                  value:
+                    code: 123
+                    error: Invalid request
+                Transaction-is-created-but-merchant-customer-id-is-not-found-by-Rocketgate:
+                  value:
+                    transactionId: 40d1b854-fa91-4654-87ec-43faa95a67dd
+                    status: declined
+                    code: 414
+                    reason: Invalid or missing customer ID
+                Transaction-is-created-but-merchant-invoice-id-is-not-found-by-Rocketgate:
+                  value:
+                    transactionId: 38233478-a8ff-465e-8762-f4ba189b17e6
+                    status: declined
+                    code: 441
+                    reason: The MERCHANT_INVOICE_ID was not found.
+                Transaction-is-created-but-merchant-id-is-invalid:
+                  value:
+                    transactionId: 420bd8e0-0ada-485c-a80e-e7f065946165
+                    status: declined
+                    code: 406
+                    reason: Merchant ID is missing from request or is not a valid merchant ID.
+                Transaction-is-created-but-merchant-password-is-invalid: {}
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: string
+                  error:
+                    type: string
+              examples:
+                Transaction-Service-is-experiencing-a-fatal-error:
+                  value:
+                    code: 0
+                    error: Something went wrong
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                transactionId:
+                  type: string
+                merchantId:
+                  type: string
+                merchantPassword:
+                  type: string
+                merchantCustomerId:
+                  type: string
+                merchantInvoiceId:
+                  type: string
+                merchantAccount:
+                  type: number
+                startRebill:
+                  type: object
+                  properties:
+                    amount:
+                      type: number
+                    start:
+                      type: number
+                    frequency:
+                      type: number
+                newRebill:
+                  type: object
+                  properties:
+                    amount:
+                      type: number
+                    start:
+                      type: number
+                    frequency:
+                      type: number
+                stopRebill:
+                  type: boolean
+                amount:
+                  type: number
+                currency:
+                  type: string
+                payment:
+                  type: object
+                  properties:
+                    method:
+                      type: string
+                    information:
+                      type: object
+                      properties:
+                        number:
+                          type: string
+                        expirationMonth:
+                          type: string
+                        expirationYear:
+                          type: string
+                        cvv:
+                          type: string
+                        cardHash:
+                          type: string
+            examples:
+              Transaction-created-and-start-rebill-with-charge-new-card-accepted-by-Rocketgate:
+                value:
+                  transactionId: 5fa02765-69a8-4a54-9780-86ec9d5ec307
+                  merchantId: '1390920700'
+                  merchantPassword: XujtRmUZeDMqJTuw
+                  merchantCustomerId: 3d4c0c07-6dc7-4116-b921-3353ae1d738d
+                  merchantInvoiceId: 8a534f01-5dc2cbf2390041.88295088
+                  merchantAccount: 1
+                  amount: 20
+                  currency: USD
+                  startRebill:
+                    amount: 15
+                    start: 365
+                    frequency: 365
+                  payment:
+                    method: cc
+                    information:
+                      number: '4298543385950573'
+                      expirationMonth: '10'
+                      expirationYear: '2022'
+                      cvv: '321'
+              Transaction-created-and-start-rebill-with-charge-existing-card-accepted-by-Rocketgate:
+                value:
+                  transactionId: 27b7f721-7091-4489-ac72-7538cd7ead7f
+                  merchantId: '1390920700'
+                  merchantPassword: XujtRmUZeDMqJTuw
+                  merchantCustomerId: 3d4c0c07-6dc7-4116-b921-3353ae1d738d
+                  merchantInvoiceId: 8a534f01-5dc2cbf2390041.88295088
+                  merchantAccount: 1
+                  amount: 20
+                  currency: USD
+                  startRebill:
+                    amount: 15
+                    start: 365
+                    frequency: 365
+                  payment:
+                    method: cc
+                    information:
+                      cardHash: m77xlHZiPKVsF9p1/VdzTb+CUwaGBDpuSRxtcb7+j24=
+              Transaction-created-and-start-rebill-without-charge-accepted-by-Rocketgate:
+                value:
+                  transactionId: cf8636e3-936c-4f4e-be99-87505ae4bc45
+                  merchantId: '1390920700'
+                  merchantPassword: XujtRmUZeDMqJTuw
+                  merchantCustomerId: 3d4c0c07-6dc7-4116-b921-3353ae1d738d
+                  merchantInvoiceId: 8a534f01-5dc2cbf2390041.88295088
+                  merchantAccount: 1
+                  startRebill:
+                    amount: 15
+                    start: 365
+                    frequency: 365
+              Transaction-created-and-stop-rebill-without-charge-accepted-by-Rocketgate:
+                value:
+                  transactionId: 1d5a86d1-5c53-4c2c-b688-f2f204b4508d
+                  merchantId: '1390920700'
+                  merchantPassword: XujtRmUZeDMqJTuw
+                  merchantCustomerId: 3d4c0c07-6dc7-4116-b921-3353ae1d738d
+                  merchantInvoiceId: 8a534f01-5dc2cbf2390041.88295088
+                  merchantAccount: 1
+                  stopRebill: true
+              Transaction-created-and-update-rebill-without-charge-accepted-by-Rocketgate:
+                value:
+                  transactionId: 01a60952-c2f9-47e5-ab21-54375faa09b0
+                  merchantId: '1390920700'
+                  merchantPassword: XujtRmUZeDMqJTuw
+                  merchantCustomerId: 3d4c0c07-6dc7-4116-b921-3353ae1d738d
+                  merchantInvoiceId: 8a534f01-5dc2cbf2390041.88295088
+                  merchantAccount: 1
+                  newRebill:
+                    amount: 15
+                    start: 365
+                    frequency: 365
+              Transaction-is-created-but-is-declined-by-Rocketgate:
+                value:
+                  transactionId: 7fda2903-0e80-470d-a5ee-84dff9da130c
+                  merchantId: '1390920700'
+                  merchantPassword: XujtRmUZeDMqJTuw
+                  merchantCustomerId: 3d4c0c07-6dc7-4116-b921-3353ae1d738d
+                  merchantInvoiceId: 8a534f01-5dc2cbf2390041.88295088
+                  merchantAccount: 1
+                  stopRebill: true
+              Transaction-is-created-but-Rocketgate-provides-a-generic-error-or-times-out:
+                value:
+                  transactionId: 6dd4a6f7-a39e-42b1-955c-8cd2199acbd4
+                  merchantId: '1390920700'
+                  merchantPassword: XujtRmUZeDMqJTuw
+                  merchantCustomerId: 3d4c0c07-6dc7-4116-b921-3353ae1d738d
+                  merchantInvoiceId: 8a534f01-5dc2cbf2390041.88295088
+                  merchantAccount: 1
+                  stopRebill: true
+              Invalid-payload:
+                value:
+                  transactionId: b8a64588-b411-4d9b-be6d-520ea7ec2179
+                  merchantId: '1390920700'
+                  merchantPassword: XujtRmUZeDMqJTuw
+                  stopRebill: true
+              Transaction-is-created-but-merchant-customer-id-is-not-found-by-Rocketgate:
+                value:
+                  transactionId: 40d1b854-fa91-4654-87ec-43faa95a67dd
+                  merchantId: '1390920700'
+                  merchantPassword: XujtRmUZeDMqJTuw
+                  merchantCustomerId: 3d4c0c07-6dc7-4116-b921
+                  merchantInvoiceId: 8a534f01-5dc2cbf2390041.88295088
+                  merchantAccount: 1
+                  stopRebill: true
+              Transaction-is-created-but-merchant-invoice-id-is-not-found-by-Rocketgate:
+                value:
+                  transactionId: 38233478-a8ff-465e-8762-f4ba189b17e6
+                  merchantId: '1390920700'
+                  merchantPassword: XujtRmUZeDMqJTuw
+                  merchantCustomerId: 3d4c0c07-6dc7-4116-b921-3353ae1d738d
+                  merchantInvoiceId: 8a534f01-5dc2cbf2390041
+                  merchantAccount: 1
+                  stopRebill: true
+              Transaction-is-created-but-merchant-id-is-invalid:
+                value:
+                  transactionId: 420bd8e0-0ada-485c-a80e-e7f065946165
+                  merchantId: '123'
+                  merchantPassword: XujtRmUZeDMqJTuw
+                  merchantCustomerId: 3d4c0c07-6dc7-4116-b921-3353ae1d738d
+                  merchantInvoiceId: 8a534f01-5dc2cbf2390041.88295088
+                  merchantAccount: 1
+                  stopRebill: true
+              Transaction-is-created-but-merchant-password-is-invalid:
+                value:
+                  transactionId: 11aac921-154b-43cb-b93d-7166647b36ec
+                  merchantId: '1390920700'
+                  merchantPassword: invalid
+                  merchantCustomerId: 3d4c0c07-6dc7-4116-b921-3353ae1d738d
+                  merchantInvoiceId: 8a534f01-5dc2cbf2390041.88295088
+                  merchantAccount: 1
+                  stopRebill: true
+        description: Update rebill body request
+      tags:
+        - Rocketgate
+        - Transaction
+  '/api/v1/updateRebill/netbilling':
+    post:
+      summary: Update Rebill
+      operationId: post-api-v1-updateRebill-netbilling
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: 'transaction.yml#/components/schemas/Transaction'
+              examples:
+                Transaction-was-created-and-rebill-update-request-was-accepted-by-Netbilling:
+                  value:
+                    transactionId: 5fa02765-69a8-4a54-9780-86ec9d5ec307
+                    status: approved
+                Transaction-is-created-but-is-declined-by-Netbilling:
+                  value:
+                    transactionId: 7fda2903-0e80-470d-a5ee-84dff9da130c
+                    status: declined
+                    code: 420
+                    reason: 'Invalid data in one of the rebill parameters, or an invalid combination of the rebill parameters'
+                    errorClassification:
+                      mappingCriteria:
+                        billerName: Netbilling
+                        processor: 'INT/CO#105C4SxCK'
+                        authMessage: DO NOT HONOR
+                      groupDeclined: 104
+                      errorType: Soft
+                      groupMessage: Generic Decline
+                      recommendedAction: Retry or advise customer to contact their bank
+                Transaction-is-created-but-Netbilling-provides-a-generic-error-or-times-out:
+                  value:
+                    transactionId: 6dd4a6f7-a39e-42b1-955c-8cd2199acbd4
+                    status: aborted
+                    code: 305
+                    reason: The transaction failed because applications within the Netbilling servers are unavailable or shutdown
+                    errorClassification:
+                      mappingCriteria:
+                        billerName: Netbilling
+                        processor: 'INT/CO#105C4SxCK'
+                        authMessage: DO NOT HONOR
+                      groupDeclined: 104
+                      errorType: Soft
+                      groupMessage: Generic Decline
+                      recommendedAction: Retry or advise customer to contact their bank
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: string
+                  error:
+                    type: string
+              examples:
+                InvalidPayload:
+                  value:
+                    code: 123
+                    error: Invalid request
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: string
+                  error:
+                    type: string
+              examples:
+                Transaction-Service-is-experiencing-a-fatal-error:
+                  value:
+                    code: 0
+                    error: Something went wrong
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                transactionId:
+                  type: string
+                siteTag:
+                  type: string
+                accountId:
+                  type: string
+                merchantPassword:
+                  type: string
+                amount:
+                  type: string
+                binRouting:
+                  type: string
+                updateRebill:
+                  type: object
+                  properties:
+                    amount:
+                      type: string
+                    start:
+                      type: string
+                    frequency:
+                      type: string
+                payment:
+                  oneOf:
+                    - $ref: 'transaction.yml#/components/schemas/CreditCard'
+                    - $ref: 'transaction.yml#/components/schemas/NetbillingPaymentTemplate'
+              required:
+                - transactionId
+                - siteTag
+                - accountId
+                - merchantPassword
+                - amount
+                - updateRebill
+                - payment
+            examples:
+              Transaction-created-and-start-rebill-with-charge-existing-card-accepted-by-Netbilling:
+                value:
+                  transactionId: 3771662f-8cfa-4c62-a740-59369e762d7c
+                  siteTag: MGUNIVERSE
+                  accountId: '111305669711325'
+                  merchantPassword: qsRbycTX5x0eC9yTP26Y
+                  amount: 20
+                  binRouting: 'INT/PX#100XTxEP'
+                  updateRebill:
+                    amount: 15
+                    start: 365
+                    frequency: 365
+                  payment:
+                    method: cc
+                    information:
+                      cardHash: m77xlHZiPKVsF9p1/VdzTb+CUwaGBDpuSRxtcb7+j24=
+              Transaction-created-and-start-rebill-with-new-card-accepted-by-Netbilling:
+                value:
+                  transactionId: 3771662f-8cfa-4c62-a740-59369e762d7c
+                  siteTag: MGUNIVERSE
+                  accountId: '111305669711325'
+                  merchantPassword: qsRbycTX5x0eC9yTP26Y
+                  amount: 20
+                  binRouting: 'INT/PX#100XTxEP'
+                  updateRebill:
+                    amount: 15
+                    start: 365
+                    frequency: 365
+                  payment:
+                    method: cc
+                    information:
+                      number: '4298543385950573'
+                      expirationMonth: '10'
+                      expirationYear: '2022'
+                      cvv: '321'
+                      member:
+                        firstName: Gisele
+                        lastName: Framboise
+                        userName: GiseleF
+                        password: qwerty123
+                        email: gisele.framboise@fruity.com
+                        phone: 514 222-5555
+                        address: 7777 Decarie
+                        zipCode: H1H1H1
+                        city: Montreal
+                        state: QC
+                        country: CA
+      tags:
+        - Netbilling
+      parameters:
+        - schema:
+            type: string
+          in: header
+          name: X-CORRELATION-ID
+          description: Correlation Id
+  '/api/v1/cancelRebill/netbilling':
+    parameters: []
+    post:
+      summary: Cancel Rebill
+      operationId: post-api-v1-cancelRebill-netbilling
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  transactionId:
+                    type: string
+                  status:
+                    type: string
+                  code:
+                    type: string
+                  reason:
+                    type: string
+              examples:
+                Transaction-was-created-and-rebill-suspend-request-was-accepted-by-the-biller:
+                  value:
+                    transactionId: a640b21e-c40b-405a-97f4-08f21b83aec1
+                    status: approved
+                Transaction-was-created-but-the-rebill-suspend-request-was-not-accepted-by-the-biller:
+                  value:
+                    transactionId: a640b21e-c40b-405a-97f4-08f21b83aec1
+                    status: declined
+                    code: xxx
+                    reason: Transaction was created but the rebill suspend request was not accepted by the biller
+                Transaction-is-created-but-Netbilling-provides-a-generic-error-or-times-out:
+                  value:
+                    transactionId: 6dd4a6f7-a39e-42b1-955c-8cd2199acbd4
+                    status: aborted
+                    code: 305
+                    reason: The transaction failed because applications within the Netbilling servers are unavailable or shutdown
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: string
+                  error:
+                    type: string
+              examples:
+                InvalidPayload:
+                  value:
+                    code: xxx
+                    error: Invalid request
+            application/xml:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: string
+                  error:
+                    type: string
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: string
+                  error:
+                    type: string
+              examples:
+                Transaction-Service-is-experiencing-a-fatal-error:
+                  value:
+                    code: 0
+                    error: Something went wrong
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                transactionId:
+                  type: string
+                siteTag:
+                  type: string
+                accountId:
+                  type: string
+                merchantPassword:
+                  type: string
+            examples:
+              example-1:
+                value:
+                  transactionId: f8674bb6-9af1-4ed5-a8ae-a2c61766d679
+                  siteTag: MGUNIVERSE
+                  accountId: '113785993259'
+                  merchantPassword: BtgN3kAIpPtbmudgMRo5
+      tags:
+        - Netbilling
+      description: ''
+      parameters:
+        - schema:
+            type: string
+          in: header
+          name: X-CORRELATION-ID
+          description: Correlation Id
+  '/api/v1/sale/epoch':
+    post:
+      summary: Epoch New Sale
+      operationId: createTransactionWithEpoch
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: 'transaction.yml#/components/schemas/EpochTransactionRequestBody'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: 'transaction.yml#/components/schemas/Transaction'
+              examples:
+                Failed-Transaction-At-Epoch:
+                  value:
+                    transactionId: 9434a5d6-bac8-4aef-8e7f-0fb4ef79a7d2
+                    status: declined
+                    code: xxx
+                    reason: Error message from Epoch
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: 'transaction.yml#/components/schemas/Transaction'
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                  error:
+                    type: string
+              examples:
+                Bad-Request-Example:
+                  value:
+                    code: 400
+                    error: Invalid clientId provided
+      tags:
+        - Epoch
+      description: Epoch New Sale
+      parameters:
+        - schema:
+            type: string
+          in: header
+          name: X-CORRELATION-ID
+          description: Correlation Id
+  '/api/v1/transaction/{transactionId}/epoch/billerInteraction':
+    parameters:
+      - schema:
+          type: string
+          format: uuid
+        name: transactionId
+        in: path
+        required: true
+        description: Transaction Id uuid
+    put:
+      summary: Add biller interaction for join postback
+      operationId: put-api-v1-transaction-transactionId-epoch-billerInteraction
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                  paymentType:
+                    type: string
+                  paymentMethod:
+                    type: string
+              examples:
+                Transaction-State-Approved:
+                  value:
+                    status: approved
+                    paymentType: cc
+                    paymentMethod: visa
+                Transaction-State-Declined:
+                  value:
+                    status: declined
+                    paymentType: cc
+                    paymentMethod: visa
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                  error:
+                    type: string
+              examples:
+                Bad-Request:
+                  value:
+                    code: 400
+                    error: Bad Request
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                  error:
+                    type: string
+              examples:
+                Transaction-Not-Found:
+                  value:
+                    code: 404
+                    error: Transaction not found
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                  error:
+                    type: string
+              examples:
+                Internal-Server-Error:
+                  value:
+                    code: 500
+                    error: Internal server error
+      tags:
+        - Epoch
+      description: Add biller interaction for join postback
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                payload:
+                  type: object
+            examples:
+              Example:
+                value:
+                  payload: {}
+      parameters:
+        - schema:
+            type: string
+            format: ''
+          in: header
+          name: X-CORRELATION-ID
+          description: Correlation Id
+  '/api/v1/sale/biller/{billerName}/session/{sessionId}':
+    post:
+      summary: Legacy sale endpoint
+      tags:
+        - Legacy
+      responses:
+        '200':
+          description: Failled to get the redirect URL from Legacy service
+          headers:
+            X-CORRELATION-ID:
+              schema:
+                type: string
+              description: correlationId
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  transactionId:
+                    type: string
+                  status:
+                    type: string
+                  code:
+                    type: string
+                  reason:
+                    type: string
+                  traceId:
+                    type: string
+                  sessionId:
+                    type: string
+                  correlationId:
+                    type: string
+              examples:
+                Failure:
+                  value:
+                    transactionId: 3fa85f64-5717-4562-b3fc-2c963f66afa6
+                    status: declined
+                    code: xxx
+                    reason: Error message
+                    traceId: 3fa85f64-5717-4562-b3fc-2c963f66afa6
+                    sessionId: 3fa85f64-5717-4562-b3fc-2c963f66afa6
+        '201':
+          description: Created pendding transaction
+          headers:
+            X-CORRELATION-ID:
+              schema:
+                type: string
+              description: correlationId
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  transactionId:
+                    type: string
+                  status:
+                    type: string
+                  redirectUrl:
+                    type: string
+                  traceId:
+                    type: string
+                  sessionId:
+                    type: string
+                  correlationId:
+                    type: string
+              examples:
+                SuccessResponse:
+                  value:
+                    transactionId: 3fa85f64-5717-4562-b3fc-2c963f66afa6
+                    status: pending
+                    redirectUrl: 'https://probiller.com/site/Purchase/default/domain/www.brazzers.com/request/D2NZ...'
+                    traceId: 3fa85f64-5717-4562-b3fc-2c963f66afa6
+                    crossSales: []
+                    sessionId: 3fa85f64-5717-4562-b3fc-2c963f66afa6
+        '400':
+          description: Bad Request
+          headers:
+            X-CORRELATION-ID:
+              schema:
+                type: string
+              description: correlationId
+          content:
+            application/json:
+              schema:
+                $ref: ./common/models/bad-request.v1.yaml
+        '404':
+          description: Not Found
+          headers:
+            X-CORRELATION-ID:
+              schema:
+                type: string
+              description: Correlation Id
+          content:
+            application/json:
+              schema:
+                $ref: ./common/models/not-found.v1.yaml
+        '500':
+          description: Internal Server Error
+          headers:
+            X-CORRELATION-ID:
+              schema:
+                type: string
+              description: Correlation Id
+          content:
+            application/json:
+              schema:
+                $ref: ./common/models/internal-error.v1.yaml
+      operationId: post-api-v1-sale-legacy
+      description: Create transaction with legacy as biller to support billers not supported yet on NG side
+      parameters:
+        - $ref: ./common/models/correlation-id.v1.yaml
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: './transaction.yml#/components/schemas/LegacyTransactionRequestBody'
+            examples:
+              LegacyRequest:
+                value:
+                  payment:
+                    type: cc
+                    method: visa
+                    information:
+                      member:
+                        firstName: AAAA
+                        lastName: FFFFF
+                        userName: AAFFF
+                        password: 123456test
+                        email: aa.ff@test.com
+                        phone: 514 000-0000
+                        address: 7777 Decarie
+                        zipCode: H1H1H1
+                        city: Montreal
+                        state: QC
+                        country: CA
+                  charges:
+                    - siteId: uuid
+                      amount: '14.97'
+                      currency: USD
+                      productId: 15
+                      isMainPurchase: true
+                      rebill:
+                        amount: 10
+                        frequency: 30
+                        start: 7
+                      tax:
+                        initialAmount:
+                          beforeTaxes: 0
+                          taxes: 0
+                          afterTaxes: 0
+                        rebillAmount:
+                          beforeTaxes: 0
+                          taxes: 0
+                          afterTaxes: 0
+                        taxApplicationId: string
+                        taxName: string
+                        taxRate: 0
+                        taxType: string
+                        displayChargedAmount: true
+                    - siteId: uuid
+                      amount: '14.97'
+                      currency: USD
+                      productId: 15
+                      isMainPurchase: false
+                      prechecked: true
+                      rebill:
+                        amount: 10
+                        frequency: 30
+                        start: 7
+                      tax:
+                        initialAmount:
+                          beforeTaxes: 0
+                          taxes: 0
+                          afterTaxes: 0
+                        rebillAmount:
+                          beforeTaxes: 0
+                          taxes: 0
+                          afterTaxes: 0
+                        taxApplicationId: string
+                        taxName: string
+                        taxRate: 0
+                        taxType: string
+                        displayChargedAmount: true
+                  billerFields:
+                    legacyMemberId: 243
+                    billerId: XXXXX
+                    returnUrl: 'http://mg-purchase-gateway/api/v1/purchase/thirdParty/return/{JWT}'
+        description: ''
+    parameters:
+      - schema:
+          type: string
+        name: sessionId
+        in: path
+        required: true
+      - schema:
+          type: string
+        name: billerName
+        in: path
+        required: true
+  '/api/v1/legacy/billerInteraction/session/{sessionId}':
+    parameters:
+      - schema:
+          type: string
+        name: sessionId
+        in: path
+        required: true
+    put:
+      summary: Legacy biller interaction
+      operationId: put-api-v1-transaction-transactionId-legacy-billerInteraction
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  transactionId:
+                    type: string
+                  status:
+                    type: string
+                  paymentType:
+                    type: string
+                  paymentMethod:
+                    type: string
+                  traceId:
+                    type: string
+                    format: uuid
+                  sessionId:
+                    type: string
+                    format: uuid
+              examples:
+                Transaction-State-Approved:
+                  value:
+                    transactionId: 04d5bbfd-4edf-42d9-9dec-97ccbf45c83e
+                    status: approved
+                    paymentType: cc
+                    paymentMethod: visa
+                    traceId: 3fa85f64-5717-4562-b3fc-2c963f66afa6
+                    sessionId: 3fa85f64-5717-4562-b3fc-2c963f66afa6
+                Transaction-State-Declined:
+                  value:
+                    transactionId: 04d5bbfd-4edf-42d9-9dec-97ccbf45c83e
+                    status: declined
+                    paymentType: cc
+                    paymentMethod: visa
+                    traceId: 3fa85f64-5717-4562-b3fc-2c963f66afa6
+                    sessionId: 3fa85f64-5717-4562-b3fc-2c963f66afa6
+          headers:
+            X-CORRELATION-ID:
+              schema:
+                type: string
+              description: correlationId
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: ./common/models/bad-request.v1.yaml
+          headers:
+            X-CORRELATION-ID:
+              schema:
+                type: string
+              description: correlationId
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: ./common/models/not-found.v1.yaml
+          headers:
+            X-CORRELATION-ID:
+              schema:
+                type: string
+              description: Correlation Id
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: ./common/models/internal-error.v1.yaml
+          headers:
+            X-CORRELATION-ID:
+              schema:
+                type: string
+              description: Correlation Id
+      description: Add biller interaction for join postback
+      parameters:
+        - $ref: ./common/models/correlation-id.v1.yaml
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                type:
+                  type: string
+                  description: response/postback
+                  enum:
+                    - postback
+                    - return
+                  example: postback
+                statusCode:
+                  type: integer
+                  description: it has to be greater than or equal to 0. 0 means approved. Any other value means declined.
+                  example: 0
+                transactionId:
+                  type: string
+                  example: a210bc70-10c5-4809-a9b2-f69d8a2bf0f7
+                siteId:
+                  type: string
+                  description: identifies the site of the cross-sale. it is required if the transaction is a cross-sale
+                  example: a6e21b83-ade2-4ff4-8b4f-c6437b73f3ed
+                responsePayload:
+                  type: object
+                  description: Legacy postback or return response(required if statusCode equals zero)
+                  properties:
+                    custom:
+                      type: object
+                      properties:
+                        mainProductId:
+                          type: string
+                    data:
+                      type: object
+                      properties:
+                        memberDetails:
+                          type: object
+                          properties:
+                            member_id:
+                              type: integer
+                        productId:
+                          type: integer
+                        transactionId:
+                          type: integer
+                        subscriptionId:
+                          type: string
+                        allMemberSubscriptions:
+                          type: array
+                          items:
+                            type: object
+                            properties:
+                              SUBSCRIPTION_ID_VALUE:
+                                type: object
+                    settleAmount:
+                      type: integer
+              required:
+                - type
+                - statusCode
+                - transactionId
+                - responsePayload
+            examples:
+              Example with Postback payload:
+                value:
+                  type: postback
+                  statusCode: 0
+                  transactionId: 8310d317-98e4-4c0d-a081-1119dcced5d1
+                  responsePayload:
+                    custom:
+                      mainProductId: 15
+                    data:
+                      memberDetails:
+                        member_id: '145106107'
+                      productId: '15'
+                      transactionId: 583545066
+                      subscriptionId: '177460261'
+                      allMemberSubscriptions:
+                        - '177460261': {}
+                    settleAmount: 50
+      tags:
+        - Legacy
+  '/api/v1/sale/otherPaymentType/rocketgate/session/{sessionId}':
+    parameters:
+      - schema:
+          type: string
+        name: sessionId
+        in: path
+        required: true
+    post:
+      summary: ''
+      operationId: post-api-v1-sale-check-rocketgate-session-sessionId
+      responses:
+        '201':
+          description: |
+            Transaction created either approved or declined by the biller.
+          content:
+            application/json:
+              schema:
+                $ref: transaction.yml#/components/schemas/Transaction
+              examples:
+                ApprovedTransaction:
+                  value:
+                    transactionId: a640b21e-c40b-405a-97f4-08f21b83aec1
+                    status: approved
+                PendingThreeDSOneTransaction:
+                  value:
+                    transactionId: 8cdb380f-2784-4b4b-bb12-13ce1d945d4f
+                    status: pending
+                    threeD:
+                      version: 1
+                      pareq: SimulatedPAREQ1000173B487C677
+                      acs: 'https://dev-secure.rocketgate.com/hostedpage/3DSimulator.jsp'
+                DeclinedTransaction:
+                  value:
+                    transactionId: a640b21e-c40b-405a-97f4-08f21b83aec1
+                    status: declined
+                    code: 303
+                    reason: The bank has declined the transaction.
+                AbortedTransaction:
+                  value:
+                    transactionId: a640b21e-c40b-405a-97f4-08f21b83aec1
+                    status: aborted
+                    code: 305
+                    reason: The transaction failed because applications within the RocketGate servers are unavailable or shutdown
+                BinIntelligenceTransaction:
+                  value:
+                    transactionId: d2e4b324-0ae0-4e99-b6fe-3cbe116b69e2
+                    status: pending
+                    threeD:
+                      version: 2
+                      deviceCollectionUrl: 'https://centinelapistag.cardinalcommerce.com/V1/Cruise/Collect'
+                      deviceCollectionJWT: eyJhbGciOiJIUzI1NiJ9.eyJ....
+        '400':
+          description: |
+            Invalid payload
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    $ref: transaction.yml#/components/schemas/OutputError
+                example:
+                  error:
+                    code: 20014
+                    message: 'Invalid payment method: cc'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    $ref: transaction.yml#/components/schemas/OutputError
+                example:
+                  error:
+                    code: 0
+                    message: Something went wrong
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: transaction.yml#/components/schemas/RocketgateOtherPaymentTypeSaleRequestBody
+            examples:
+              check:
+                value:
+                  siteId: 8051d60a-7fb0-4ef2-8e60-968eee79c104
+                  billerId: '23423'
+                  amount: 5
+                  currency: USD
+                  rebill:
+                    amount: '29.00'
+                    frequency: '30'
+                    start: '5'
+                  payment:
+                    type: checks
+                    method: checks
+                    information:
+                      routingNumber: '999999999'
+                      accountNumber: '12345'
+                      savingAccount: false
+                      socialSecurityLast4: '3214'
+                      member:
+                        firstName: Gisele
+                        lastName: Framboise
+                        userName: GiseleF
+                        password: qwerty123
+                        email: gisele.framboise@fruity.com
+                        phone: 514 222-5555
+                        address: 7777 Decarie
+                        zipCode: H1H1H1
+                        city: Montreal
+                        state: QC
+                        country: CA
+                  billerFields:
+                    merchantId: '1366400931'
+                    merchantPassword: GBrDAVvNRm4EDXJy
+                    merchantAccount: 1
+                    merchantSiteId: 7
+                    merchantProductId: 42456483-a6ae-4ed7-b43f-e19635697f28
+                    merchantCustomerId: 4165c1cddd82cce24.92280817
+                    merchantInvoiceId: 4165c1cddd83a9cb8.99590556
+                    ipAddress: 205.45.120.42
+      tags:
+        - Rocketgate
+  '/api/v1/sale/qysso':
+    post:
+      summary: Qysso New Sale
+      operationId: createTransactionWithQysso
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: 'transaction.yml#/components/schemas/QyssoTransactionRequestBody'
+            examples:
+              Single Charge New Sale:
+                value:
+                  siteId: 8e34c94e-135f-4acb-9141-58b3a6e56c74
+                  siteName: www.realitykings.com
+                  billerId: string
+                  clientIp: 10.10.10.101
+                  amount: '10.00'
+                  currency: USD
+                  payment:
+                    type: cc
+                    method: directdebit
+                    information:
+                      member:
+                        firstName: Gisele
+                        lastName: Framboise
+                        userName: GiseleF
+                        password: qwerty123
+                        email: gisele.framboise@fruity.com
+                        phone: 514-222-5555
+                        address: 7777 Decarie
+                        zipCode: H1H1H1
+                        city: Montreal
+                        state: QC
+                        country: CA
+                        memberId: '2384158730'
+                  billerFields:
+                    companyNum: '1234567'
+                    personalHashKey: FFRFF1234
+                    notificationUrl: 'http://ams-postback-capture-service.probiller.com/api/postbacks/41'
+                    redirectUrl: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  transactionId:
+                    type: string
+                  status:
+                    type: string
+                  code:
+                    type: string
+                  reason:
+                    type: string
+              examples:
+                Failed-Transaction-At-Qysso:
+                  value:
+                    transactionId: 9434a5d6-bac8-4aef-8e7f-0fb4ef79a7d2
+                    status: pending
+                    code: xxx
+                    reason: Error message from Qysso
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: 'transaction.yml#/components/schemas/Transaction'
+              examples:
+                example-1: {}
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                  error:
+                    type: string
+              examples:
+                Bad-Request-Example:
+                  value:
+                    code: 400
+                    error: Invalid something provided
+      tags:
+        - Qysso
+      description: Qysso New Sale
+      parameters:
+        - schema:
+            type: string
+          in: header
+          name: X-CORRELATION-ID
+          description: Correlation Id
+  '/api/v1/transaction/{transactionId}/qysso/billerInteraction':
+    parameters:
+      - schema:
+          type: string
+          format: uuid
+        name: transactionId
+        in: path
+        required: true
+        description: Transaction Id uuid
+    put:
+      summary: Add biller interaction for join postback
+      operationId: put-api-v1-transaction-transactionId-qysso-billerInteraction
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                  paymentType:
+                    type: string
+                  paymentMethod:
+                    type: string
+              examples:
+                Transaction-State-Approved:
+                  value:
+                    status: approved
+                    paymentType: banktransfer
+                    paymentMethod: zelle
+                Transaction-State-Declined:
+                  value:
+                    status: declined
+                    paymentType: banktransfer
+                    paymentMethod: zelle
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                  error:
+                    type: string
+              examples:
+                Bad-Request:
+                  value:
+                    code: 400
+                    error: Bad Request
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                  error:
+                    type: string
+              examples:
+                Transaction-Not-Found:
+                  value:
+                    code: 404
+                    error: Transaction not found
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                  error:
+                    type: string
+              examples:
+                Internal-Server-Error:
+                  value:
+                    code: 500
+                    error: Internal server error
+      tags:
+        - Qysso
+      description: Add biller interaction for join postback
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                payload:
+                  type: object
+            examples:
+              Approved from Biller Example:
+                value:
+                  payload: '{"reply_code":"000","reply_desc":"3D Secure Redirection is needed","trans_id":"5","trans_date":"12/21/2020 6:10:39 PM","trans_amount":"55.3","trans_currency":"1","trans_order":"6f601b4e-e627-4f6e-9a69-eb488a8a4499","merchant_id":"7162012","client_fullname":"Test Test","client_phone":null,"client_email":"testqysso78@probiller.mindgeek.com","payment_details":"Visa .... 0000","signature":"axYHMbOE5cJPLDzsBS9hSD/UFVWkWVuUb3oWFqbLcYU="}'
+      parameters:
+        - schema:
+            type: string
+            format: ''
+          in: header
+          name: X-CORRELATION-ID
+          description: Correlation Id
+  '/api/v1/qysso/rebill/billerInteraction':
+    post:
+      summary: Add a biller interaction and for rebill postback
+      description: Add a biller interaction for rebill postback
+      operationId: addBillerInteractionForQyssoRebill
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: 'transaction.yml#/components/schemas/addBillerInteractionForQyssoRebillRequestBody'
+      responses:
+        '201':
+          description: Biller interaction added and transaction created.
+          content:
+            application/json:
+              schema:
+                $ref: 'transaction.yml#/components/schemas/billerInteractionForRebillResponse'
+              examples:
+                approved-transaction:
+                  value:
+                    transactionId: uuid
+                    status: approved
+                declined-transaction:
+                  value:
+                    transactionId: uuid
+                    status: declined
+                    code: 0
+                    reason: reason
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: 'transaction.yml#/components/schemas/OutputError'
+              examples:
+                Invalid-payload:
+                  value:
+                    code: 0
+                    message: Bad request
+                Previous-transaction-does-not-support-rebill:
+                  value:
+                    code: 0
+                    message: Previous transaction status does not support rebill.
+                Previous-transaction-not-found:
+                  value:
+                    code: 0
+                    message: Previous transaction not found.
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: 'transaction.yml#/components/schemas/OutputError'
+              example:
+                code: 0
+                message: Something went wrong
+      parameters:
+        - schema:
+            type: string
+            format: ''
+          in: header
+          name: X-CORRELATION-ID
+          description: Correlation Id
+      tags:
+        - Qysso
+        - Transaction
+components:
+  schemas:
+    CreditCard:
+      $ref: 'transaction.yml#/components/schemas/CreditCard'
+    PaymentTemplate:
+      $ref: 'transaction.yml#/components/schemas/PaymentTemplate'
+    Rebill:
+      $ref: 'transaction.yml#/components/schemas/Rebill'
+    Member:
+      $ref: 'transaction.yml#/components/schemas/Member'
+    PrepaidInfo:
+      $ref: 'transaction.yml#/components/schemas/PrepaidInfo'
+    Transaction:
+      $ref: 'transaction.yml#/components/schemas/Transaction'
+    DeclinedTransaction:
+      $ref: 'transaction.yml#/components/schemas/DeclinedTransaction'
+    CreditCardInformation:
+      $ref: 'transaction.yml#/components/schemas/CreditCardInformation'
+    PaymentTemplateInformation:
+      $ref: 'transaction.yml#/components/schemas/PaymentTemplateInformation'
+    OutputError:
+      $ref: 'transaction.yml#/components/schemas/OutputError'
+    RetrieveTransaction:
+      $ref: 'transaction.yml#/components/schemas/retrieveTransaction'
+    RetrieveTransactionHealth:
+      $ref: 'transaction.yml#/components/schemas/retrieveTransactionHealth'
+    NetbillingPaymentTemplateInformation:
+      $ref: 'transaction.yml#/components/schemas/NetbillingPaymentTemplateInformation'

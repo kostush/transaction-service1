@@ -1,0 +1,26 @@
+filebeat.prospectors:
+  - input.type: log
+    pipeline: "ng-log-pipeline"
+    paths:
+      - /home/app_billing/applications/transaction-service/stage/logs/transaction-service.log
+    fields:
+      type: "log"
+  - input.type: log
+    pipeline: "ng-event-pipeline"
+    paths:
+      - /home/app_billing/applications/transaction-service/stage/logs/transaction-service-events.log
+    fields:
+      type: "event"
+
+setup.template.enabled: false
+setup.template.overwrite: false
+
+processors:
+  - drop_fields:
+      fields: ["offset", "beat.name", "beat.version"]
+
+output.elasticsearch:
+  hosts: ["ded1527.ded.reflected.net:9200"]
+  compression_level: 9
+  worker: 3
+  index: "ng-stage-logs-%{[fields.type]:other}-%{+yyyy.MM.dd}"

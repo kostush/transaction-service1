@@ -1,0 +1,5 @@
+title: charges
+type: array
+items:
+  $ref: ./charge.v1.yaml
+description: It is an array of charges

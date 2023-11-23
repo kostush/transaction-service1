@@ -1,0 +1,48 @@
+version: '3.7'
+
+networks:
+  default:
+    name: ng-network
+
+services:
+  web:
+    image: harbor.mgcorp.co/probiller/probiller-ng/php:7.3.5-grpc-1.35-v1
+    container_name: transaction-service-web
+    environment:
+      - OPCACHE_ENABLED=0
+      - NETBILLING_PROXY_ENABLED=1
+      - XDEBUG_ENABLED=1
+      - PHP_IDE_CONFIG=serverName=localhost
+      - XDEBUG_CONFIG=idekey=PHPSTORM remote_host=host.docker.internal
+      #
+      ## For GCloud access via JSON key:
+      #
+      - GOOGLE_APPLICATION_CREDENTIALS=/tmp/keys/keyfile.json
+      - FIRESTORE_EMULATOR_HOST=host.docker.internal:8080
+    volumes:
+      - type: bind
+        source: ./
+        target: /var/www/html
+      - type: volume
+        source: app_logs
+        target: /var/www/html/lumen/storage/logs
+      - type: bind
+        source: ./docs
+        target: /var/www/html/lumen/public/docs
+      - type: bind
+        source: ./entrypoint.sh
+        target: /docker-entrypoint.d/10-entrypoint.sh
+      #
+      ## For GCloud access via JSON key:
+      #
+      - type: bind
+        source: "${GOOGLE_APPLICATION_CREDENTIALS}"
+        target: /tmp/keys/keyfile.json
+    ports:
+      - 8003:80
+
+volumes:
+  app_logs:
+    external: true
+  event_logs:
+    external: true

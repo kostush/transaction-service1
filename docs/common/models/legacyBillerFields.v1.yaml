@@ -1,0 +1,20 @@
+title: legacyBillerFields
+type: object
+x-examples: {}
+properties:
+  legacyMemberId:
+    type: number
+    description: This is the legacy memberId only necessary for sec rev
+  billerId:
+    type: string
+  returnUrl:
+    type: string
+    description: This field is the sucess/failure url on legacy payload
+  others:
+    type: object
+  postbackUrl:
+    type: string
+    description: This is the postbackUrl to be override on legacy product configuration
+required:
+  - returnUrl
+  - postbackUrl

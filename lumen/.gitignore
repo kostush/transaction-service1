@@ -1,0 +1,24 @@
+# don't ignore my .gitkeeps
+
+!/storage/
+/storage/*
+
+!/storage/app/
+/storage/app/*
+!/storage/app/.gitkeep
+
+!/storage/framework/
+/storage/framework/*
+!/storage/framework/cache/
+/storage/framework/cache/*
+!/storage/framework/cache/.gitkeep
+
+!/storage/framework/views/
+/storage/framework/views/*
+!/storage/framework/views/.gitkeep
+
+!/storage/logs/
+/storage/logs/*
+!/storage/logs/.gitkeep
+
+/.env

@@ -1,0 +1,3 @@
+{
+  "payload": "{\"reply_code\":\"002\",\"reply_desc\":\"No details\",\"trans_id\":\"3\",\"trans_date\":\"12\\/21\\/2020 6:16:49 PM\",\"trans_amount\":\"55.3\",\"trans_currency\":\"1\",\"trans_order\":\"6f601b4e-e627-4f6e-9a69-eb488a8a4245\",\"merchant_id\":\"7162012\",\"client_fullname\":\"Test Test\",\"client_phone\":null,\"client_email\":\"testqysso65@probiller.mindgeek.com\",\"payment_details\":\"Visa .... 0000\",\"signature\":\"+1ybezW8SVImBuoqavbffBtz\\/1Hv6S8CJhBVfU62zb4=\"}"
+}

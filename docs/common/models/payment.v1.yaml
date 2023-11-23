@@ -1,0 +1,55 @@
+title: Payment
+type: object
+description: Payment Information
+x-examples:
+  payment:
+    type: cc
+    method: visa
+    information:
+      member:
+        firstName: AAAA
+        lastName: FFFFF
+        userName: AAFFF
+        password: 123456test
+        email: aa.ff@test.com
+        phone: 514 000-0000
+        address: 7777 Decarie
+        zipCode: H1H1H1
+        city: Montreal
+        state: QC
+        country: CA
+properties:
+  type:
+    type: string
+  method:
+    type: string
+  information:
+    type: object
+    properties:
+      member:
+        type: object
+        properties:
+          firstName:
+            type: string
+          lastName:
+            type: string
+          username:
+            type: string
+          password:
+            type: string
+          email:
+            type: string
+          phone:
+            type: string
+          address:
+            type: string
+          zipCode:
+            type: string
+          city:
+            type: string
+          state:
+            type: string
+          country:
+            type: string
+required:
+  - type

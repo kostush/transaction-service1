@@ -1,0 +1,13 @@
+.idea
+vendor
+.env*
+coverage
+.phpunit.result.cache
+lumen/.env.testing
+grpc/Dockerfile
+firestore/.config/
+firestore/firebase-debug.log
+firestore/firestore-debug.log
+firestore/ui-debug.log
+firestore/_data
+bash.exe.stackdump

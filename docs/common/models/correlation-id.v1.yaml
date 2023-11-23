@@ -1,0 +1,11 @@
+title: Request Correlation Id
+name: X-CORRELATION-ID
+type: string
+schema:
+  type: string
+properties:
+  id:
+    type: string
+in: header
+description: Unique Id to be used in logging.
+example: f04ad4cf-9d29-4922-a00c-4584452ee950

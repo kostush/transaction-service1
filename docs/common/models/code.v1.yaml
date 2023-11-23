@@ -1,0 +1,4 @@
+type: number
+title: code
+example: Proper error code
+description: Code related to an error

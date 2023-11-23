@@ -1,0 +1,47 @@
+title: tax
+type: object
+x-examples:
+  tax:
+    initialAmount:
+      beforeTaxes: 10
+      taxes: 0.1
+      afterTaxes: 11
+    rebillAmount:
+      beforeTaxes: 10
+      taxes: 0.1
+      afterTaxes: 11
+    taxApplicationId: string
+    taxName: VAT
+    taxRate: 0.1
+    taxType: string
+    displayChargedAmount: true
+description: tax especification when it was needed
+properties:
+  initialAmount:
+    type: object
+    properties:
+      beforeTaxes:
+        type: number
+      taxes:
+        type: number
+      afterTaxes:
+        type: number
+  rebillAmount:
+    type: object
+    properties:
+      beforeTaxes:
+        type: number
+      taxes:
+        type: number
+      afterTaxes:
+        type: number
+  taxApplicationId:
+    type: string
+  taxName:
+    type: string
+  taxRate:
+    type: number
+  taxTytpe:
+    type: string
+  displayChargedAmount:
+    type: boolean

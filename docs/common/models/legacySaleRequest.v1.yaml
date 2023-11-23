@@ -1,0 +1,15 @@
+title: Legacy Sale Request
+type: object
+description: Legacy Sale Request body
+x-examples: {}
+properties:
+  payment:
+    $ref: ./payment.v1.yaml
+  charges:
+    $ref: ./charges.v1.yaml
+  billerFields:
+    $ref: ./legacyBillerFields.v1.yaml
+required:
+  - payment
+  - charges
+  - billerFields

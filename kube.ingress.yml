@@ -1,0 +1,15 @@
+apiVersion: networking.k8s.io/v1beta1
+kind: Ingress
+metadata:
+  name: transaction-service-ingress
+  annotations:
+    kubernetes.io/ingress.class: nginx
+  namespace: transaction-service
+spec:
+  rules:
+    - host: transaction-service.local
+      http:
+        paths:
+         - backend:
+            serviceName: transaction-service-web
+            servicePort: 8103

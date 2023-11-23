@@ -1,0 +1,15 @@
+{
+  "reply_code": "000",
+  "reply_desc": "SUCCESS",
+  "trans_id": "2",
+  "trans_date": "12\/21\/2020 6:10:40 PM",
+  "trans_amount": "55.3",
+  "trans_currency": "1",
+  "trans_order": "6f601b4e-e627-4f6e-9a69-eb488a8a4499",
+  "merchant_id": "7162012",
+  "client_fullname": "Test Test",
+  "client_phone": null,
+  "client_email": "testqysso78@probiller.mindgeek.com",
+  "payment_details": "Visa .... 0000",
+  "signature": "updd+wboweTept\/ZwMGqin\/Pe+YVjSwWmb6CiIIfZAc="
+}

@@ -1,0 +1,1755 @@
+components:
+  schemas:
+    CreditCard:
+      type: object
+      required:
+        - method
+        - information
+      properties:
+        method:
+          type: string
+          example: cc
+        information:
+          $ref: '#/components/schemas/CreditCardInformation'
+      discriminator:
+        propertyName: method
+    CreditCardLookup:
+      type: object
+      required:
+        - method
+        - information
+      properties:
+        method:
+          type: string
+          example: cc
+        information:
+          $ref: '#/components/schemas/CreditCardInformationWithoutMember'
+      discriminator:
+        propertyName: method
+    Check:
+      type: object
+      required:
+        - type
+        - method
+        - information
+      properties:
+        type:
+          type: string
+          example: checks
+        method:
+          type: string
+          example: checks
+        information:
+          $ref: '#/components/schemas/CheckInformation'
+      discriminator:
+        propertyName: method
+    PaymentTemplate:
+      type: object
+      discriminator:
+        propertyName: method
+      properties:
+        method:
+          type: string
+          example: cc
+        information:
+          $ref: '#/components/schemas/PaymentTemplateInformation'
+      required:
+        - method
+        - information
+    NetbillingPaymentTemplate:
+      type: object
+      discriminator:
+        propertyName: method
+      properties:
+        method:
+          type: string
+          example: cc
+        information:
+          $ref: '#/components/schemas/NetbillingPaymentTemplateInformation'
+      required:
+        - method
+        - information
+    NetbillingMember:
+      type: object
+      properties:
+        userName:
+          type: string
+          example: GiselleF
+        password:
+          type: string
+          example: secretPassword
+    CreditCardInformation:
+      type: object
+      required:
+        - number
+        - expirationMonth
+        - expirationYear
+        - cvv
+        - member
+      properties:
+        number:
+          type: number
+          example: 4111111111111111
+        expirationMonth:
+          type: number
+          example: 1
+        expirationYear:
+          type: number
+          example: 2020
+        cvv:
+          type: number
+          example: 523
+        member:
+          $ref: '#/components/schemas/Member'
+    CreditCardInformationWithoutMember:
+      type: object
+      required:
+        - number
+        - expirationMonth
+        - expirationYear
+        - cvv
+      properties:
+        number:
+          type: number
+          example: 4111111111111111
+        expirationMonth:
+          type: number
+          example: 1
+        expirationYear:
+          type: number
+          example: 2020
+        cvv:
+          type: number
+          example: 523
+    PaymentTemplateInformation:
+      type: object
+      required:
+        - cardHash
+      properties:
+        cardHash:
+          type: number
+          example: k243k5j24392h2929g29g2h9...
+    NetbillingPaymentTemplateInformation:
+      type: object
+      required:
+        - cardHash
+      properties:
+        cardHash:
+          type: number
+          example: 'CS:25685223633:5896'
+    CheckInformation:
+      type: object
+      required:
+        - routingNumber
+        - accountNumber
+        - savingAccount
+        - socialSecurityLast4
+        - member
+      properties:
+        routingNumber:
+          description: 'it should be a numeric string to accept 0 at left'
+          type: string
+          example: '999999999'
+        accountNumber:
+          description: 'it should be a numeric string to accept 0 at left'
+          type: string
+          example: '12345'
+        savingAccount:
+          type: boolean
+          example: false
+        socialSecurityLast4:
+          description: 'it should be a numeric string to accept 0 at left'
+          type: string
+          example: '3214'
+        member:
+          $ref: '#/components/schemas/CheckMember'
+    Rebill:
+      type: object
+      properties:
+        amount:
+          type: number
+          description: |
+            Amount to rebill the customer.
+          format: double
+          example: '29.00'
+        frequency:
+          type: integer
+          example: '30'
+          description: |
+            Frequency of rebill (in days).
+        start:
+          type: integer
+          example: '5'
+          minimum: 0
+          maximum: 550
+          description: |
+            When (in days) rebill will start. Normally used for
+            trial memberships.
+      required:
+        - amount
+        - frequency
+        - start
+    CheckMember:
+      type: object
+      required:
+        - firstName
+        - lastName
+        - zipCode
+        - address
+        - state
+        - city
+        - country
+      properties:
+        firstName:
+          type: string
+          example: Gisele
+        lastName:
+          type: string
+          example: Framboise
+        userName:
+          type: string
+          example: GiseleF
+        password:
+          type: string
+          example: qwerty123
+        email:
+          type: string
+          format: email
+          example: gisele.framboise@test.mindgeek.com
+        phone:
+          type: string
+          example: 514 222-5555
+        address:
+          type: string
+          example: 7777 Decarie
+        zipCode:
+          type: string
+          example: H1H1H1
+        city:
+          type: string
+          example: Montreal
+        state:
+          type: string
+          example: QC
+        country:
+          type: string
+          example: CA
+    Member:
+      type: object
+      required:
+        - firstName
+        - lastName
+        - email
+        - zipCode
+      properties:
+        firstName:
+          type: string
+          example: Gisele
+        lastName:
+          type: string
+          example: Framboise
+        userName:
+          type: string
+          example: GiseleF
+        password:
+          type: string
+          example: qwerty123
+        email:
+          type: string
+          format: email
+          example: gisele.framboise@fruity.com
+        phone:
+          type: string
+          example: 514 222-5555
+        address:
+          type: string
+          example: 7777 Decarie
+        zipCode:
+          type: string
+          example: H1H1H1
+        city:
+          type: string
+          example: Montreal
+        state:
+          type: string
+          example: QC
+        country:
+          type: string
+          example: CA
+    PrepaidInfo:
+      type: object
+      description: Prepaid Card Balance Information. This is an optional information that will be returned for pre-paid cards only if the bank supports it.
+      properties:
+        amount:
+          type: string
+          example: 236.15
+          description: Prepaid Card Balance Amount.
+        currency:
+          type: string
+          example: CAD
+          description: Prepaid Card Balance Currency.
+    ErrorClassification:
+      type: object
+      description: Error classification based on biller declined response.
+      properties:
+        groupDecline:
+          type: string
+          example: 104
+          description: A code sent by the biller.
+        errorType:
+          type: string
+          example: Soft
+          description: Error types - Hard/Soft/Risk/Error.
+        groupMessage:
+          type: string
+          example: Transaction amount exceed card limit.
+          description: The group message used to get clasiffied error.
+        recommendedAction:
+          type: string
+          example: Retry smaller amount.
+          description: The recomended action for that specific biller declined error.
+    QrCode:
+      type: object
+      properties:
+        qrCode:
+          type: string
+          description: The QR code is represented as a base64 string.
+        encryptText:
+          type: string
+          description: Encrypted string used to generate the mobile payment button
+        transactionId:
+          type: string
+          description: 'Please store this information if you what to make additional operations with this transaction, such as confirm a postback and rebill.'
+          example: 95d711a5-f92f-463d-9936-28cfa57b77ad
+          format: uuid
+        status:
+          type: string
+          example: pending
+          description: The state of the transaction.
+    billerInteractionForJoinResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          description: The transaction state.
+          example: approved
+    billerInteractionForRebillResponse:
+      type: object
+      properties:
+        transactionId:
+          type: string
+          description: Transaction id when new transaction created (qysso case).
+          example: 95d711a5-f92f-463d-9936-28cfa57b77ad
+          format: uuid
+        previousTransactionId:
+          type: string
+          description: Reference transaction id (for pumapay only).
+          example: 95d711a5-f92f-463d-9936-28cfa57b77ad
+          format: uuid
+        status:
+          type: string
+          description: The transaction state.
+          example: approved
+    abortTransactionResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          description: The transaction state.
+          example: aborted
+    Transaction:
+      type: object
+      x-examples:
+        example-1: {}
+      properties:
+        transactionId:
+          type: string
+          format: uuid
+        status:
+          type: string
+          enum:
+            - approved
+            - declined
+            - failed
+            - pending
+            - aborted
+        code:
+          type: integer
+          example: 105
+        reason:
+          type: string
+          example: 'The bank has declined the transaction because the account is over limit'
+        pareq:
+          type: string
+          example: SimulatedPAREQ100016FF154A833
+          deprecated: true
+        acs:
+          type: string
+          example: 'https://dev1.rocketgate.com/hostedpage/3DSimulator.jsp'
+          deprecated: true
+        threeD:
+          type: object
+          properties:
+            version:
+              type: integer
+              example: 1
+            pareq:
+              type: string
+              example: SimulatedPAREQ100016FF154A833
+            acs:
+              type: string
+              example: 'https://dev1.rocketgate.com/hostedpage/3DSimulator.jsp'
+            deviceCollectionUrl:
+              type: string
+              example: 'https://centinelapistag.cardinalcommerce.com/V1/Cruise/Collect'
+            deviceCollectionJWT:
+              type: string
+              example: eyJhbGciOiJIUzI1NiJ9.eyJqdGkiOiI3MjA1OTE4NzgyNTk3NjM0N....
+            stepUpUrl:
+              type: string
+              example: 'https://dev-secure.rocketgate.com/hostedpage/3DSimulator_2_0.jsp'
+            stepUpJwt:
+              type: string
+              example: 'eyJhbGciOiJIUzI1NiJ9.eyJqdGkiOiI3MjA1OTE4NzgyNTk3NjM0NSIsImlhdCI6MTU5Mzc4ODA0OCwiaXNzIjoiNWNmYTVhMDFhZmE4MGQyMjUwZmQzMTc5IiwiT3JnVW5pdElkIjoiNWNmNzA2OWRiYjg3NjgxOTZjMTBhNGU5In0.Xs_zq65Z8af1u38tUdO9be1liZ7LN8PiCzRSAjVz6Lg'
+            md:
+              type: string
+              example: '<rocketgate_biller_transaction_id>'
+            paymentLinkUrl:
+              type: string
+              example: http://payment-link-url
+        redirectUrl:
+          type: string
+          example: 'https://join.wnu.com/invoice?cache_key=3d5310f0-ac86-48f6-8a97-0c513524966a&version=4'
+        crossSales:
+          type: array
+          items:
+            type: object
+            properties:
+              transactionId:
+                type: string
+                example: uuid
+              status:
+                type: string
+                example: pending
+        prepaid:
+          $ref: '#/components/schemas/PrepaidInfo'
+        errorClassification:
+          $ref: '#/components/schemas/ErrorClassification'
+    BillerFields:
+      type: object
+      required:
+        - merchantId
+        - merchantPassword
+      properties:
+        merchantId:
+          type: number
+          example: '1366400931'
+        merchantPassword:
+          type: string
+          example: GBrDAVvNRm4EDXJy
+        merchantAccount:
+          type: number
+          example: 1
+        merchantSiteId:
+          type: number
+          minimum: 0
+          maximum: 50000
+          example: 7
+        merchantProductId:
+          type: string
+          maxLength: 36
+          example: 42456483-a6ae-4ed7-b43f-e19635697f28
+        merchantCustomerId:
+          type: string
+          maxLength: 40
+          example: 4165c1cddd82cce24.92280817
+        merchantInvoiceId:
+          type: string
+          maxLength: 40
+          example: 4165c1cddd83a9cb8.99590556
+        ipAddress:
+          type: string
+          format: ipv4
+          example: 205.45.120.42
+        sharedSecret:
+          type: string
+          example: XXXXxX1XXXXxxXXx
+        simplified3DS:
+          type: boolean
+          example: true
+    PaymentTemplateBillerFields:
+      type: object
+      required:
+        - merchantId
+        - merchantPassword
+        - merchantCustomerId
+      properties:
+        merchantId:
+          type: number
+          example: '1366400931'
+        merchantPassword:
+          type: string
+          example: GBrDAVvNRm4EDXJy
+        merchantAccount:
+          type: number
+          example: 1
+        merchantSiteId:
+          type: number
+          minimum: 0
+          maximum: 50000
+          example: 7
+        merchantProductId:
+          type: string
+          maxLength: 36
+          example: 42456483-a6ae-4ed7-b43f-e19635697f28
+        merchantCustomerId:
+          description: This field is mandatory for existing card sale requests
+          type: string
+          maxLength: 40
+          example: 4165c1cddd82cce24.92280817
+        merchantInvoiceId:
+          type: string
+          maxLength: 40
+          example: 4165c1cddd83a9cb8.99590556
+        ipAddress:
+          type: string
+          format: ipv4
+          example: 205.45.120.42
+        referringMerchantId:
+          type: number
+          example: '1366400931'
+        sharedSecret:
+          type: string
+          example: XXXXxX1XXXXxxXXx
+        simplified3DS:
+          type: boolean
+          example: true
+    DeclinedTransaction:
+      type: object
+      required:
+        - code
+        - reason
+        - transaction
+      properties:
+        code:
+          type: number
+          description: |
+            Decline unique error code.
+        reason:
+          type: string
+          description: |
+            There are several reasons a transaction can be declined. Mapping ones like Non-Sufficient Funds are important for business decisions.
+        transaction:
+          $ref: '#/components/schemas/Transaction'
+    OutputError:
+      type: object
+      properties:
+        code:
+          type: integer
+        message:
+          type: string
+    NetbillingBillerFields:
+      title: NetbillingBillerFields
+      type: object
+      properties:
+        siteTag:
+          type: string
+          example: '001'
+        accountId:
+          type: string
+          example: '111147354317'
+        merchantPassword:
+          type: string
+          example: BtgNFFpPHHHHdRFFRD
+        initialDays:
+          type: integer
+          example: 2
+        ipAddress:
+          type: string
+          format: ipv4
+          example: 205.45.120.15
+        browser:
+          type: string
+          example: "Mozilla\\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\\/537.36 (KHTML, like Gecko) Chrome\\/77.0.3865.120 Safari\\/537.36"
+        host:
+          type: string
+          example: yuluserpool3.nat.as55222.com
+        binRouting:
+          type: string
+          example: 'INT/PX#100XTxEP'
+        billerMemberId:
+          type: string
+          example: '1234569879'
+        disableFraudChecks:
+          type: string
+          example: false
+      required:
+        - siteTag
+        - accountId
+        - initialDays
+    QyssoBillerFields:
+      title: QyssoBillerFields
+      type: object
+      x-examples:
+        qysso biller fields:
+          companyNum: '111111'
+          personalHashKey: hash key
+          redirectUrl: 'http://purchase-gateway.probiller.com/api/v1/purchase/thirdParty/return/{jwt}'
+          notificationUrl: 'https://postback-gateway.probiller.com/api/postback/{receiverId}/session/{sessionId}'
+          invoiceId: UUID
+      description: ''
+      properties:
+        companyNum:
+          type: string
+          description: Company Num
+          example: some string
+        personalHashKey:
+          type: string
+          description: The client key
+          example: some string
+        redirectUrl:
+          type: string
+          description: The redirect url
+          example: 'http://purchase-gateway.probiller.com/api/v1/purchase/thirdParty/return/{jwt}'
+        notificationUrl:
+          type: string
+          description: The postback url
+          example: 'https://postback-gateway.probiller.com/api/postback/{receiverId}/session/{sessionId}'
+      required:
+        - companyNum
+        - personalHashKey
+        - redirectUrl
+        - notificationUrl
+    EpochBillerFields:
+      title: EpochBillerFields
+      type: object
+      x-examples:
+        epoch biller fields:
+          clientId: '111'
+          clientKey: clientKey
+          clientVerificationKey: clientVerificationKey
+          redirectUrl: 'http://purchase-gateway.probiller.com/api/v1/purchase/thirdParty/return/{jwt}'
+          notificationUrl: 'https://postback-gateway.probiller.com/api/postbacks/{UUID}'
+          invoiceId: UUID
+      description: ''
+      properties:
+        clientId:
+          type: string
+          description: The client id
+          example: some string
+        clientKey:
+          type: string
+          description: The client key
+          example: some string
+        clientVerificationKey:
+          type: string
+          description: The client verification key
+          example: some string
+        redirectUrl:
+          type: string
+          description: The redirect url
+          example: 'http://purchase-gateway.probiller.com/api/v1/purchase/thirdParty/return/{jwt}'
+        notificationUrl:
+          type: string
+          description: The postback url
+          example: 'https://postback-gateway.probiller.com/api/postbacks/{UUID}'
+        invoiceId:
+          type: string
+          description: The epoch invoice id
+          example: invoiceId
+      required:
+        - clientId
+        - clientKey
+        - clientVerificationKey
+        - redirectUrl
+        - notificationUrl
+        - invoiceId
+    LegacyBillerFields:
+      title: LegacyBillerFields
+      type: object
+      x-examples:
+        legacy biller fields:
+          billerId: '23426'
+          billerName: legacy
+          returnUrl: 'https://stage3-ord.probiller.com/mcp/tools/response/result/true/domain/www.brazzers.com'
+          postbackUrl: 'http://postback-purchase-gateway/api/v1/purchase/thirdParty/return/1235'
+      description: ''
+      properties:
+        billerId:
+          type: string
+          description: The biller id
+          example: 23426
+        billerName:
+          type: string
+          description: The biller name
+          example: legacy
+        returnUrl:
+          type: string
+          description: The return url
+          example: 'https://stage3-ord.probiller.com/mcp/tools/response/result/true/domain/www.brazzers.com'
+        postbackUrl:
+          type: string
+          description: The postback url
+          example: 'http://postback-purchase-gateway/api/v1/purchase/thirdParty/return/1235'
+        others:
+          type: array
+          description: Other fields
+          example: []
+      required:
+        - billerId
+        - billerName
+        - returnUrl
+        - postbackUrl
+    SaleRequestBody:
+      type: object
+      required:
+        - siteId
+        - billerId
+        - amount
+        - currency
+        - payment
+        - billerFields
+      properties:
+        siteId:
+          type: string
+          example: 8051d60a-7fb0-4ef2-8e60-968eee79c104
+        billerId:
+          type: string
+          example: '23423'
+        amount:
+          type: number
+          format: double
+          example: 5
+        currency:
+          type: string
+          default: USD
+          example: USD
+        useThreeD:
+          type: boolean
+          example: true
+        returnUrl:
+          type: string
+          example: http://purchase-gateway.probiller.com/api/v2/purchase/threed/complete/jwt
+        isNSFSupported:
+          type: boolean
+          example: true
+        rebill:
+          $ref: '#/components/schemas/Rebill'
+        payment:
+          $ref: '#/components/schemas/CreditCard'
+        billerFields:
+          $ref: '#/components/schemas/BillerFields'
+    LegacyTransactionRequestBody:
+      $ref: ./common/models/legacySaleRequest.v1.yaml
+    LookupRequestBody:
+      type: object
+      required:
+        - deviceFingerprintingId
+        - previousTransactionId
+        - redirectUrl
+        - payment
+      properties:
+        deviceFingerprintingId:
+          type: string
+          example: '12345'
+        previousTransactionId:
+          type: string
+          example: '8051d60a-7fb0-4ef2-8e60-968eee79c104'
+        redirectUrl:
+          type: string
+          example: 'https://purchase-gateway.probiller.com/api/v1/purchase/threed/complete/ydg5H9HWxnSO1Kl70yLEoohZwl11tK59uZx8wvuCitWNqKZlJ_3nBTn1om4tPJ5C3wLeB_ods0wjlUZuP-GnNg'
+        payment:
+          $ref: '#/components/schemas/CreditCardLookup'
+        isNSFSupported:
+          type: boolean
+          example: true
+    QyssoTransactionRequestBody:
+      type: object
+      properties:
+        siteId:
+          type: string
+        siteName:
+          type: string
+        clientIp:
+          type: string
+        billerId:
+          type: string
+        amount:
+          type: string
+        currency:
+          type: string
+        rebill:
+          type: object
+          properties:
+            amount:
+              type: number
+            frequency:
+              type: integer
+            start:
+              type: integer
+        payment:
+          type: object
+          properties:
+            type:
+              type: string
+              nullable: true
+              enum:
+                - banktransfer
+            method:
+              type: string
+              nullable: true
+              enum:
+                - zelle
+            information:
+              type: object
+              properties:
+                member:
+                  description: 'Member details'
+                  type: object
+                  required:
+                    - email
+                  properties:
+                    firstName:
+                      type: string
+                      example: Gisele
+                    lastName:
+                      type: string
+                      example: Framboise
+                    userName:
+                      type: string
+                      example: GiseleF
+                    password:
+                      type: string
+                      example: qwerty123
+                    email:
+                      type: string
+                      example: gisele.framboise@fruity.com
+                    phone:
+                      type: string
+                      example: 514 222-5555
+                    address:
+                      type: string
+                      example: 7777 Decarie
+                    zipCode:
+                      type: string
+                      example: H1H1H1
+                    city:
+                      type: string
+                      example: Montreal
+                    state:
+                      type: string
+                      example: QC
+                    country:
+                      type: string
+                      example: CA
+                    memberId:
+                      type: string
+                      example: 2384158730
+        tax:
+          type: object
+          properties:
+            initialAmount:
+              type: object
+              properties:
+                beforeTaxes:
+                  type: number
+                taxes:
+                  type: number
+                afterTaxes:
+                  type: number
+            rebillAmount:
+              type: object
+              properties:
+                beforeTaxes:
+                  type: number
+                taxes:
+                  type: number
+                afterTaxes:
+                  type: number
+            taxApplicationId:
+              type: string
+            taxName:
+              type: string
+            taxRate:
+              type: number
+            taxType:
+              type: string
+        billerFields:
+          type: object
+          required:
+            - companyNum
+            - personalHashKey
+            - notificationUrl
+            - redirectUrl
+          properties:
+            companyNum:
+              type: string
+            personalHashKey:
+              type: string
+            notificationUrl:
+              type: string
+            redirectUrl:
+              type: string
+      required:
+        - siteId
+        - siteName
+        - billerId
+        - amount
+        - currency
+        - paymentType
+        - paymentMethod
+        - billerFields
+      example:
+        value:
+          siteId: 8e34c94e-135f-4acb-9141-58b3a6e56c74
+          siteName: www.realitykings.com
+          billerId: XXXXX
+          amount: '14.97'
+          currency: USD
+          paymentType: banktransfer
+          paymentMethod: zelle
+          username: username
+          rebill:
+            amount: 10
+            frequency: 365
+            start: 30
+          tax:
+            initialAmount:
+              beforeTaxes: 14.23
+              taxes: 0.74
+              afterTaxes: 14.97
+            rebillAmount:
+              beforeTaxes: 9.5
+              taxes: 0.5
+              afterTaxes: 10
+            taxApplicationId: 60bf5bcb-ac64-496c-acc5-9c7cf54a1869
+            taxName: Tax Name
+            taxRate: 0.05
+            taxType: vat
+          billerFields:
+            companyNum: '101988'
+            personalHashKey: 'FFFF4556F6'
+            redirect_url: 'http://purchase-gateway.probiller.com/api/v1/purchase/thirdParty/return/{jwt}'
+            notification_url: 'https://postback-gateway.probiller.com/api/postback/{receiverId}/session/{sessionId}'
+    EpochTransactionRequestBody:
+      type: object
+      properties:
+        siteId:
+          type: string
+        siteName:
+          type: string
+        billerId:
+          type: string
+        amount:
+          type: string
+        currency:
+          type: string
+        rebill:
+          type: object
+          properties:
+            amount:
+              type: number
+            frequency:
+              type: integer
+            start:
+              type: integer
+        payment:
+          type: object
+          properties:
+            type:
+              type: string
+              nullable: true
+              enum:
+                - cc
+                - ewallet
+                - banktransfer
+                - prepaywallet
+                - checks
+                - cryptocurrency
+                - giftcards
+            method:
+              type: string
+              nullable: true
+              enum:
+                - alipay
+                - americanexpress
+                - bccard
+                - bancontact
+                - cartebleue
+                - checks
+                - cryptocurrency
+                - dinacard
+                - dinersclub
+                - directdebit
+                - discover
+                - ec
+                - elv
+                - eps
+                - epsssl
+                - euteller
+                - giftcards
+                - giropay
+                - interaconline
+                - jcb
+                - maestro
+                - mastercard
+                - mastercarddebit
+                - neosurf
+                - neteller
+                - onlineuberweisung
+                - poli
+                - paypal
+                - paysafecard
+                - postepay
+                - przelewy24
+                - qiwi
+                - sepadirectdebit
+                - safetypay
+                - skrill
+                - sofortbanking
+                - sofortuberweisung
+                - switch
+                - trustpay
+                - unionpay
+                - visa
+                - visadebit
+                - wechat
+                - epaybg
+                - ideal
+                - toditocash
+            information:
+              type: object
+              properties:
+                member:
+                  type: object
+                  properties:
+                    firstName:
+                      type: string
+                      example: Gisele
+                    lastName:
+                      type: string
+                      example: Framboise
+                    userName:
+                      type: string
+                      example: GiseleF
+                    password:
+                      type: string
+                      example: qwerty123
+                    email:
+                      type: string
+                      example: gisele.framboise@fruity.com
+                    phone:
+                      type: string
+                      example: 514 222-5555
+                    address:
+                      type: string
+                      example: 7777 Decarie
+                    zipCode:
+                      type: string
+                      example: H1H1H1
+                    city:
+                      type: string
+                      example: Montreal
+                    state:
+                      type: string
+                      example: QC
+                    country:
+                      type: string
+                      example: CA
+                    memberId:
+                      type: string
+                      example: 2384158730
+        tax:
+          type: object
+          properties:
+            initialAmount:
+              type: object
+              properties:
+                beforeTaxes:
+                  type: number
+                taxes:
+                  type: number
+                afterTaxes:
+                  type: number
+            rebillAmount:
+              type: object
+              properties:
+                beforeTaxes:
+                  type: number
+                taxes:
+                  type: number
+                afterTaxes:
+                  type: number
+            taxApplicationId:
+              type: string
+            taxName:
+              type: string
+            taxRate:
+              type: number
+            taxType:
+              type: string
+        crossSales:
+          type: array
+          items:
+            type: object
+            properties:
+              siteId:
+                type: string
+              siteName:
+                type: string
+              amount:
+                type: number
+              rebill:
+                type: object
+                properties:
+                  amount:
+                    type: number
+                  frequency:
+                    type: integer
+                  start:
+                    type: integer
+              tax:
+                type: object
+                properties:
+                  initialAmount:
+                    type: object
+                    properties:
+                      beforeTaxes:
+                        type: number
+                      taxes:
+                        type: number
+                      afterTaxes:
+                        type: number
+                  rebillAmount:
+                    type: object
+                    properties:
+                      beforeTaxes:
+                        type: number
+                      taxes:
+                        type: number
+                      afterTaxes:
+                        type: number
+                  taxApplicationId:
+                    type: string
+                  taxName:
+                    type: string
+                  taxRate:
+                    type: number
+                  taxType:
+                    type: string
+              prechecked:
+                type: boolean
+        billerFields:
+          type: object
+          required:
+            - clientId
+            - clientKey
+            - clientVerificationKey
+            - redirect_url
+            - notification_url
+          properties:
+            clientId:
+              type: string
+            clientKey:
+              type: string
+            clientVerificationKey:
+              type: string
+            redirect_url:
+              type: string
+            notification_url:
+              type: string
+      required:
+        - siteId
+        - siteName
+        - billerId
+        - amount
+        - currency
+        - paymentType
+        - paymentMethod
+        - billerFields
+      example:
+        value:
+          siteId: 8e34c94e-135f-4acb-9141-58b3a6e56c74
+          siteName: www.realitykings.com
+          billerId: XXXXX
+          amount: '14.97'
+          currency: USD
+          paymentType: cc
+          paymentMethod: visa
+          username: username
+          rebill:
+            amount: 10
+            frequency: 365
+            start: 30
+          tax:
+            initialAmount:
+              beforeTaxes: 14.23
+              taxes: 0.74
+              afterTaxes: 14.97
+            rebillAmount:
+              beforeTaxes: 9.5
+              taxes: 0.5
+              afterTaxes: 10
+            taxApplicationId: 60bf5bcb-ac64-496c-acc5-9c7cf54a1869
+            taxName: Tax Name
+            taxRate: 0.05
+            taxType: vat
+          crossSales:
+            - siteId: 8e34c94e-135f-4acb-9141-58b3a6e56c74
+            - siteName: www.realitykings.com
+            - amount: '1.95'
+              rebill:
+                amount: 10
+                frequency: 30
+                start: 30
+              tax:
+                initialAmount:
+                  beforeTaxes: 1.86
+                  taxes: 0.09
+                  afterTaxes: 1.95
+                rebillAmount:
+                  beforeTaxes: 9.5
+                  taxes: 0.5
+                  afterTaxes: 10
+                taxApplicationId: 60bf5bcb-ac64-496c-acc5-9c7cf54a1869
+                taxName: Tax Name
+                taxRate: 0.05
+                taxType: vat
+              prechecked: true
+          billerFields:
+            clientId: '101988'
+            clientKey: XXXX
+            clientVerificationKey: XXXX
+            redirect_url: 'http://purchase-gateway.probiller.com/api/v1/purchase/thirdParty/return/{jwt}'
+            notification_url: 'https://postback-gateway.probiller.com/api/postbacks/{UUID}'
+    ExistingCardSaleRequestBody:
+      type: object
+      required:
+        - siteId
+        - billerId
+        - amount
+        - currency
+        - payment
+        - billerFields
+      properties:
+        siteId:
+          type: string
+          example: 8051d60a-7fb0-4ef2-8e60-968eee79c104
+        billerId:
+          type: string
+          example: '23423'
+        amount:
+          type: number
+          format: double
+          example: 5
+        currency:
+          type: string
+          default: USD
+          example: USD
+        useThreeD:
+          type: bool
+          example: true
+        returnUrl:
+          type: string
+          example: http://purchase-gateway.probiller.com/api/v2/purchase/threed/complete/jwt
+        rebill:
+          $ref: '#/components/schemas/Rebill'
+        payment:
+          $ref: '#/components/schemas/PaymentTemplate'
+        billerFields:
+          $ref: '#/components/schemas/PaymentTemplateBillerFields'
+    retrieveTransaction:
+      type: object
+      properties:
+        biller_id:
+          type: string
+          example: 23131
+          description: Biller Id
+        biller_name:
+          type: string
+          example: rocketgate
+          description: Biller Name
+        merchant_id:
+          type: string
+          example: '*********'
+          description: Merchant Id
+        merchant_password:
+          type: string
+          example: '*********'
+          description: Merchant connection password
+        invoice_id:
+          type: string
+          deprecated: true
+          example: 4165c1cddd83a9cb8.99590556
+          description: Invoice generated by the Merchant response
+        customer_id:
+          type: string
+          deprecated: true
+          example: 4165c1cddd82cce24.92280817
+          description: Customer generated by the Merchant response
+        card_hash:
+          type: string
+          description: Rocketgate card hash
+          example: m77xlHZiPKVsF9p1/VdzTb+CUwaGBDpuSRxtcb7+j24=
+        transaction_id:
+          type: string
+          example: 1000168A8FCBC67
+          deprecated: true
+          description: Merchant generated transaction Id
+        biller_transaction_id:
+          type: string
+          description: Biller generated transaction Id
+          deprecated: true
+          example: 1000168A8FCBC67
+        biller_member_id:
+          type: string
+          example: '5698523654'
+          description: Biller generated member Id
+        currency:
+          type: string
+          example: USD
+          description: The currency used for the transaction
+        site_id:
+          type: string
+          example: 8051d60a-7fb0-4ef2-8e60-968eee79c104
+          description: The UUID of the site that requested this transaction
+        payment_type:
+          type: string
+          example: cc
+          description: The payment method used
+        payment_method:
+          type: string
+          example: vs
+          description: The payment sub type used
+        merchant_account:
+          type: string
+          example: 1
+          description: Merchant account to which transaction is to be applied (Specific Rocketgate)
+        card_expiration_year:
+          type: integer
+          description: The expiration year of the used credit card
+          example: 2022
+        card_expiration_month:
+          type: integer
+          description: The expiration month of the used credit card
+          example: 12
+        card_description:
+          type: string
+          description: Card description. It wont be always available. (Currently available for Rocketgate)
+          example: CREDIT
+        member:
+          type: object
+          description: User specific details used for billing
+          properties:
+            email:
+              type: string
+              example: gisele.framboise@fruity.com
+              description: The user email used for the requested transaction
+            phone_number:
+              type: string
+              example: 514 222-5555
+              description: The user phone number used for the requested transaction
+            first_name:
+              type: string
+              example: Gisele
+              description: The user first name used for the requested transaction
+            last_name:
+              type: string
+              example: Framboise
+              description: The user last name used for the requested transaction
+            address:
+              type: string
+              example: 7777 Decarie
+              description: The user address used for the requested transaction
+            city:
+              type: string
+              example: Montreal
+              description: The user city used for the requested transaction
+            state:
+              type: string
+              example: QC
+              description: The state address used for the requested transaction
+            zip:
+              type: string
+              example: H1H1H1
+              description: The user zip used for the requested transaction
+            country:
+              type: string
+              example: CA
+              description: The user country used for the requested transaction
+            name:
+              type: string
+              example: John Smith
+              description: 'Some billers, such as Epoch, will return only one name filed'
+        transaction:
+          type: object
+          description: Transaction specific details used for billing
+          properties:
+            transaction_id:
+              type: string
+              example: fb5701f3-ef18-4ee1-8203-4b67328fc7fd
+              description: The transaction Id generated by the transaction service
+            first6:
+              type: string
+              example: '******'
+              description: First six card numbers used to make the Credit Card payment
+            last4:
+              type: string
+              example: '****'
+              description: Last four card numbers used to make the Credit Card payment
+            amount:
+              type: string
+              example: 123.4
+              description: The transaction ammount charged
+            created_at:
+              type: string
+              example: '2019-02-01 12:16:01'
+              description: The creation date of the transaction
+            rebill_amount:
+              type: string
+              example: 29.99
+              description: The rebill ammount
+            rebill_frequency:
+              type: string
+              example: 30
+              description: The rebill frequency mesured in days
+            rebill_start:
+              type: string
+              example: 30
+              description: The rebill start date is the ammount of days until the first rebill occours
+            status:
+              type: string
+              example: approved
+              description: The transaction status
+            code:
+              type: integer
+              example: 105
+              description: The transaction decline code
+            reason:
+              type: string
+              example: 'The bank has declined the transaction because the account is over limit'
+              description: The transaction decline reason
+            payment_detailed_information:
+              type: object
+              properties:
+                card_hash:
+                  type: string
+                first_six:
+                  type: string
+                last_four:
+                  type: string
+        biller_settings:
+          anyOf:
+            - $ref: '#/components/schemas/BillerFields'
+            - $ref: '#/components/schemas/NetbillingBillerFields'
+            - $ref: '#/components/schemas/EpochBillerFields'
+            - $ref: '#/components/schemas/LegacyBillerFields'
+            - $ref: '#/components/schemas/QyssoBillerFields'
+        biller_transactions:
+          type: array
+          description: The biller transactions array
+          items:
+            type: object
+            properties:
+              invoice_id:
+                type: string
+                example: 1111c1cddd83a9cb8.11190556
+              customer_id:
+                type: string
+                example: 1111c1cddd83a9cb8.11190556
+              biller_transaction_id:
+                type: string
+                example: 1111168A8FCBC67
+              type:
+                type: string
+                example: sale
+              pi_code:
+                type: string
+                example: '123'
+              biller_member_id:
+                type: string
+                example: '789'
+              company_num:
+                type: string
+                example: '11111'
+              initial_biller_transaction_id:
+                type: string
+                example: '789'
+              raw_biller_response:
+                type: object
+                example: {}
+              ans:
+                type: string
+                description: The epoch ans string
+                example: 'Y011371NM |2342235562'
+        secured_with_three_d:
+          type: boolean
+          example: true
+          description: Flag for 3DS secured transaction
+        threed_secured_version:
+          type: integer
+          example: 1
+          description: The threeD secured version
+        previous_transaction_id:
+          type: string
+          example: e34ca48c-3380-11e9-b210-d663bd873d93
+          description: The previous transaction id
+        bin_routing:
+          type: string
+    retrieveQrCodeRequestBody:
+      type: object
+      properties:
+        siteId:
+          type: string
+          example: e34ca48c-3380-11e9-b210-d663bd873d93
+          description: Billing Gateway siteId for NG.
+        billerId:
+          type: string
+          example: '12345'
+          description: PumaPay identifier in NG.
+        currency:
+          type: string
+          example: EUR
+          description: "The currency's transaction."
+        amount:
+          type: number
+          format: double
+          example: 29.99
+          description: Amount to bill the customer.
+        rebill:
+          type: object
+          properties:
+            amount:
+              type: number
+              format: double
+              example: 29.99
+              description: Amount to rebill the customer.
+            frequency:
+              type: integer
+              example: 30
+              description: Frequency of rebill (in days).
+            start:
+              type: integer
+              example: 5
+              minimum: 0
+              maximum: 365
+              description: When (in days) rebill will start. Normally used for trial memberships.
+        billerFields:
+          type: object
+          properties:
+            businessId:
+              type: string
+            businessModel:
+              type: string
+            apiKey:
+              type: string
+            title:
+              type: string
+              example: Brazzers Membership
+            description:
+              type: string
+              example: 1$ day then daily rebill at 1$ for 3 days
+        transactionId:
+          type: string
+          example: 5756a5df-4f66-4c33-9aa5-e7e65ef377cb
+          description: Optional - Used only in case of third party purchase from Payment Gateway
+    addBillerInteractionForJoinRequestBody:
+      type: object
+      properties:
+        payload:
+          type: object
+          properties:
+            transactionData:
+              type: object
+              properties:
+                statusID:
+                  type: number
+                  example: 3
+                index:
+                  type: string
+                  example: 1
+            paymentData:
+              type: object
+    addBillerInteractionForRebillRequestBody:
+      type: object
+      properties:
+        previousTransactionId:
+          type: string
+          description: The reference transaction id.
+          example: 95d711a5-f92f-463d-9936-28cfa57b77ad
+          format: uuid
+        payload:
+          type: object
+          properties:
+            transactionData:
+              type: object
+              properties:
+                statusID:
+                  type: number
+                  example: 3
+                index:
+                  type: string
+                  example: '2'
+            paymentData:
+              type: object
+    addBillerInteractionForQyssoRebillRequestBody:
+      type: object
+      properties:
+        previousTransactionId:
+          type: string
+          description: The reference transaction id.
+          example: 95d711a5-f92f-463d-9936-28cfa57b77ad
+          format: uuid
+        payload:
+          type: object
+    retrieveTransactionHealth:
+      type: object
+      properties:
+        status:
+          type: string
+          example: OK
+          description: "Overall status. It's ok if at least one of the billers has the status ok."
+        billers:
+          type: object
+          description: Individual status per billers
+          properties:
+            Rocketgate:
+              type: string
+              example: OK
+              description: The status for Rocketgate biller
+    NetBillingSaleRequestBody:
+      title: NetBillingSaleRequestBody
+      type: object
+      properties:
+        billerFields:
+          $ref: '#/components/schemas/NetbillingBillerFields'
+        payment:
+          $ref: '#/components/schemas/CreditCard'
+        rebill:
+          $ref: '#/components/schemas/Rebill'
+        currency:
+          type: string
+          default: USD
+          example: USD
+        amount:
+          type: number
+          format: double
+          example: 5
+        billerId:
+          type: string
+          example: '23423'
+        siteId:
+          type: string
+          example: 8051d60a-7fb0-4ef2-8e60-968eee79c104
+      required:
+        - siteId
+        - billerId
+        - amount
+        - currency
+        - payment
+        - billerFields
+    NetbillingExistingCardSaleRequestBody:
+      type: object
+      required:
+        - siteId
+        - billerId
+        - amount
+        - currency
+        - payment
+        - billerFields
+      properties:
+        siteId:
+          type: string
+          example: 8051d60a-7fb0-4ef2-8e60-968eee79c104
+        billerId:
+          type: string
+          example: '23423'
+        amount:
+          type: number
+          format: double
+          example: 5
+        currency:
+          type: string
+          default: USD
+          example: USD
+        rebill:
+          $ref: '#/components/schemas/Rebill'
+        payment:
+          $ref: '#/components/schemas/NetbillingPaymentTemplate'
+        billerFields:
+          $ref: '#/components/schemas/NetbillingBillerFields'
+        member:
+          $ref: '#/components/schemas/NetbillingMember'
+    CompleteThreeDRequestBody:
+      type: object
+      properties:
+        pares:
+          type: string
+          example: SimulatedPARES100016FEC22B711
+        md:
+          type: string
+          example: 10001732904A027
+    CompleteSimplifiedThreeDRequestBody:
+      type: object
+      required:
+        - queryString
+      properties:
+        queryString:
+          type: string
+          example: querystring
+    RocketgateOtherPaymentTypeSaleRequestBody:
+      type: object
+      required:
+        - siteId
+        - billerId
+        - amount
+        - currency
+        - payment
+        - billerFields
+      properties:
+        siteId:
+          type: string
+          example: 8051d60a-7fb0-4ef2-8e60-968eee79c104
+        billerId:
+          type: string
+          example: '23423'
+        amount:
+          type: number
+          format: double
+          example: 5
+        currency:
+          type: string
+          default: USD
+          example: USD
+        rebill:
+          $ref: '#/components/schemas/Rebill'
+        payment:
+          $ref: '#/components/schemas/Check'
+        billerFields:
+          $ref: '#/components/schemas/BillerFields'
+  parameters:
+    billerName:
+      in: path
+      name: billerName
+      required: true
+      schema:
+        type: string
+        enum:
+          - rocketgate
+      description: Biller which purchase will process given transaction.
+    sessionId:
+      in: path
+      name: sessionId
+      required: true
+      schema:
+        type: string
+      example: 0ea7a023-d9e2-494c-a27c-c0a0e6f9715a
+      description: Unique Id to be used in logging
+    transactionId:
+      in: path
+      name: transactionId
+      required: true
+      schema:
+        type: string
+      example: 8051d60a-7fb0-4ef2-8e60-968eee79c104
+      description: Transaction UUID

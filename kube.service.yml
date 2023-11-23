@@ -1,0 +1,18 @@
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: transaction-service-web
+  namespace: transaction-service
+  labels:
+    component: transaction-service-web
+spec:
+  selector:
+    app: transaction-service-web
+  ports:
+    - protocol: TCP
+      port: 8103
+      name: "api-http"
+      targetPort: 80
+  type: LoadBalancer
+

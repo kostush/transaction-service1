@@ -1,0 +1,27 @@
+FROM harbor.mgcorp.co/probiller/probiller-ng/php
+
+#RUN rm -rf /etc/nginx/conf.d/*
+#RUN rm /usr/local/etc/php-fpm.d/www.conf
+#COPY /configs/php/www.conf /usr/local/etc/php-fpm.d/www.conf
+#COPY /configs/nginx/nginx.conf /etc/nginx/nginx.conf
+#COPY /configs/nginx/conf.d/* /etc/nginx/conf.d/
+#COPY /configs/supervisord.conf /etc/supervisor/supervisord.conf
+#COPY /configs/newrelic_plugin_agent.cfg /etc/newrelic_plugin_agent.cfg
+#COPY /scripts/stop-supervisor.sh /usr/local/bin/stop-supervisor.sh
+
+#RUN chmod u+x /usr/local/bin/stop-supervisor.sh
+
+#ADD https://getcomposer.org/composer.phar /usr/local/bin/composer
+#RUN chmod 777 /usr/local/bin/composer
+#STOPSIGNAL SIGTERM
+COPY . /var/www/html/
+
+RUN chsh -s /bin/bash www-data && \
+    chown -R www-data:www-data /var/www/html
+
+ADD entrypoint.sh /docker-entrypoint.d/10-entrypoint.sh
+#RUN chmod u+x /docker-entrypoint.sh
+#ENTRYPOINT ["tini", "--", "/docker-entrypoint.sh"]
+WORKDIR /var/www/html/
+
+EXPOSE 80

@@ -1,0 +1,8 @@
+{
+  "invokerPackage": "ProbillerNG\\TransactionServiceClient",
+  "variableNamingConvention": "camelCase",
+  "packageName": "TransactionServiceClient",
+  "srcBasePath": "src",
+  "gitUserId": "probiller-ng",
+  "gitRepoId": "transaction-service-client"
+}

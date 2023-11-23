@@ -1,0 +1,43 @@
+title: charge
+type: object
+description: Charge item used on charges array on legacy request payload
+x-examples:
+  chargeItem:
+    amount: '14.97'
+    currency: USD
+    productId: 15
+    isMainPurchase: true
+    rebill:
+      amount: 10
+      frequency: 30
+      start: 7
+properties:
+  amount:
+    type: number
+    description: "it is not mandatory because third party billers don't need amount, tax or cross sale information"
+  currency:
+    type: string
+  productId:
+    type: number
+    description: Legacy productId
+  isMainPurchase:
+    type: boolean
+  rebill:
+    type: object
+    properties:
+      amount:
+        type: number
+      frequency:
+        type: number
+      start:
+        type: number
+  tax:
+    $ref: ./tax.v1.yaml
+  siteId:
+    type: string
+    description: NG siteId
+required:
+  - currency
+  - productId
+  - isMainPurchase
+  - siteId

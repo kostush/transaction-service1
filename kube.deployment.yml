@@ -1,0 +1,65 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: transaction-service-web
+  namespace: transaction-service
+  labels:
+    app: transaction-service-web
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: transaction-service-web
+  template:
+    metadata:
+      labels:
+        app: transaction-service-web
+    spec:
+      volumes:
+        - name: shared-files
+          emptyDir: {}
+        #- name: transaction-service-logs-volume
+        #  persistentVolumeClaim:
+        #    claimName: transaction-service-logs-pvc
+      containers:
+        - image: ng-nginx
+          imagePullPolicy: IfNotPresent
+          name: transaction-service-nginx
+          ports:
+            - containerPort: 80
+          volumeMounts:
+            - name: shared-files
+              mountPath: /var/www/html
+        - image: filebeat-transaction-service-image
+          imagePullPolicy: IfNotPresent
+          name: transaction-service-filebeat
+          volumeMounts:
+            - name: shared-files
+              mountPath: /var/www/html
+        - image: transaction-service-image
+          imagePullPolicy: IfNotPresent
+          name: transaction-service-php
+          volumeMounts:
+            - name: shared-files
+              mountPath: /var/www/html
+           # - name: transaction-service-logs-volume
+           #   mountPath: /var/www/html/lumen/storage
+          lifecycle:
+            postStart:
+              exec:
+                command: ["/bin/sh", "-c", "cp -r /var/www/app/. /var/www/html"]
+---
+
+#apiVersion: v1
+#kind: PersistentVolumeClaim
+#metadata:
+#  name: transaction-service-logs-pvc
+#  namespace: transaction-service
+#  labels:
+#    app: transaction-service-logs-pvc
+#spec:
+#  accessModes:
+#    - ReadWriteOnce
+#  resources:
+#    requests:
+#      storage: 2Gi

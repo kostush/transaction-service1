@@ -1,0 +1,23 @@
+title: internalErrorResponse
+type: object
+description: Internal Server Error
+x-examples:
+  error response:
+    code: 500
+    error: error message
+    traceId: 1552287a-3f42-4978-b61a-9eb2cfe22759
+    sesssionId: 42f93cec-11a7-44a6-adfe-5d28401c2627
+properties:
+  error:
+    $ref: ./error.v1.yaml
+  code:
+    $ref: ./code.v1.yaml
+  traceId:
+    $ref: ./traceid.v1.yaml
+  sessionId:
+    $ref: ./sessionId.v1.yaml
+required:
+  - error
+  - code
+  - traceId
+  - sessionId
